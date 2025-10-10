@@ -1,0 +1,26 @@
+{
+  "name": "discord-ai-chatbot",
+  "version": "1.0.0",
+  "description": "Discord AI Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/georgedobreff/discord-ai-chatbot.git"
+  },
+  "keywords": [],
+  "author": "George (Witcher) Dobreff",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/georgedobreff/discord-ai-chatbot/issues"
+  },
+  "homepage": "https://github.com/georgedobreff/discord-ai-chatbot#readme",
+  "dependencies": {
+    "discord.js": "^14.23.2",
+    "dotenv": "^17.2.3"
+  }
+}
