@@ -145,7 +145,7 @@ client.on(Events.InteractionCreate, async interaction => {
 client.on(Events.GuildMemberAdd, async member => {
 
     const user = member.user;
-    const welcomeText = `Hello, ${user.username}!`;
+    const welcomeText = `Hello, ${user.username}! Welcome to the server. I am ${config.llmName} your private AI assistant. Let's chat!`;
 
     try {
         await user.send(welcomeText);

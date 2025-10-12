@@ -10,5 +10,9 @@ I REPEAT: KEEP YOUR RESPONSES UNDER ${characterLimit} CHARACTERS IN LENGTH!`
 
 module.exports = {
     llmPersona,
-    historyLimit
+    historyLimit,
+    llmName,
+    creator,
+    historyLimit,
+    characterLimit
 };
