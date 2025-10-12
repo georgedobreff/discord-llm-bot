@@ -5,6 +5,7 @@ const Groq = require('groq-sdk');
 const groq = new Groq();
 const fs = require('fs');
 const path = require('path');
+const config = require('./config.js')
 const { REST, Routes, DMChannel, ChannelType, WelcomeChannel} = require('discord.js');
 
 const deployCommands = async () => {
@@ -155,20 +156,21 @@ client.on(Events.GuildMemberAdd, async member => {
     }
 });
 
-
 // Groq API Logic
+
+
 
 client.on(Events.MessageCreate, async userDM => {
    if(userDM.channel.type !== ChannelType.DM || userDM.guild !== null || userDM.author.bot){
     return;
    }
-   const chatHistory = await userDM.channel.messages.fetch({ limit: 10});
+   const chatHistory = await userDM.channel.messages.fetch({ limit: config.historyLimit});
    const chatHistoryArray = Array.from(chatHistory.values()).reverse();
    try {
     await userDM.channel.sendTyping();
     const chatCompletion = await groq.chat.completions.create({
         messages: [
-            { role: 'system', content: 'You are a funny and entertaining chat bot designed by George Dobreff. Your name is Witcher. Your purpose is to entertain the user. Keep your responses within 100 characters limit! I REPEAT: KEEP YOUR RESPONSES UNDER 100 CHARACTERS IN LENGTH!' + 'This is the conversation history so far: ' + chatHistoryArray  },
+            { role: 'system', content: config.llmPersona + 'This is the conversation history so far: ' + chatHistoryArray  },
             { role: 'user', content: userDM.content }
         ],
         // model: 'llama-3.1-8b-instant',
