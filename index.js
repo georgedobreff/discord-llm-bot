@@ -5,7 +5,7 @@ const Groq = require('groq-sdk');
 const groq = new Groq();
 const fs = require('fs');
 const path = require('path');
-const { REST, Routes, DMChannel, ChannelType} = require('discord.js');
+const { REST, Routes, DMChannel, ChannelType, WelcomeChannel} = require('discord.js');
 
 const deployCommands = async () => {
     try {
@@ -139,19 +139,36 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
+// Welcoming message for user authorization
+
+client.on(Events.GuildMemberAdd, async member => {
+
+    const user = member.user;
+    const welcomeText = `Hello, ${user.username}!`;
+
+    try {
+        await user.send(welcomeText);
+        
+    } catch (error) {
+        console.warn(`Could not send welcome DM to ${user.tag}. They likely have DMs disabled.`);
+
+    }
+});
+
+
 // Groq API Logic
 
 client.on(Events.MessageCreate, async userDM => {
    if(userDM.channel.type !== ChannelType.DM || userDM.guild !== null || userDM.author.bot){
     return;
    }
-
+   const chatHistory = await userDM.channel.messages.fetch({ limit: 10});
+   const chatHistoryArray = Array.from(chatHistory.values()).reverse();
    try {
     await userDM.channel.sendTyping();
-
     const chatCompletion = await groq.chat.completions.create({
         messages: [
-            { role: 'system', content: 'You are a funny and entertaining chat bot designed by George Dobreff. Your name is Witcher. Your purpose is to entertain the user. Keep your responses within 100 characters limit! I REPEAT: KEEP YOUR RESPONSES UNDER 100 CHARACTERS IN LENGTH!' },
+            { role: 'system', content: 'You are a funny and entertaining chat bot designed by George Dobreff. Your name is Witcher. Your purpose is to entertain the user. Keep your responses within 100 characters limit! I REPEAT: KEEP YOUR RESPONSES UNDER 100 CHARACTERS IN LENGTH!' + 'This is the conversation history so far: ' + chatHistoryArray  },
             { role: 'user', content: userDM.content }
         ],
         // model: 'llama-3.1-8b-instant',
@@ -170,5 +187,6 @@ client.on(Events.MessageCreate, async userDM => {
     catch (error) {
         console.error(error);
 }});
+
 
 client.login(process.env.BOT_TOKEN);
