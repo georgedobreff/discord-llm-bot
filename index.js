@@ -1,7 +1,12 @@
 require('dotenv').config();
+
+
+const Groq = require('groq-sdk');
+const groq = new Groq();
 const fs = require('fs');
 const path = require('path');
-const { REST, Routes} = require('discord.js');
+const { REST, Routes, DMChannel, ChannelType} = require('discord.js');
+
 const deployCommands = async () => {
     try {
         const commands = [];
@@ -47,6 +52,7 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
+        GatewayIntentBits.DirectMessages,
         GatewayIntentBits.GuildMembers
     ],
     partials: [
@@ -132,5 +138,37 @@ client.on(Events.InteractionCreate, async interaction => {
         }
     }
 });
+
+// Groq API Logic
+
+client.on(Events.MessageCreate, async userDM => {
+   if(userDM.channel.type !== ChannelType.DM || userDM.guild !== null || userDM.author.bot){
+    return;
+   }
+
+   try {
+    await userDM.channel.sendTyping();
+
+    const chatCompletion = await groq.chat.completions.create({
+        messages: [
+            { role: 'system', content: 'You are a funny and entertaining chat bot designed by George Dobreff. Your name is Witcher. Your purpose is to entertain the user. Keep your responses within 100 characters limit! I REPEAT: KEEP YOUR RESPONSES UNDER 100 CHARACTERS IN LENGTH!' },
+            { role: 'user', content: userDM.content }
+        ],
+        // model: 'llama-3.1-8b-instant',
+          model: "openai/gpt-oss-20b",
+          tools: [
+                {
+                type: "browser_search"
+            }
+  ]
+    });
+    const responseText = chatCompletion.choices[0].message.content;
+
+    await userDM.reply(responseText);
+
+}
+    catch (error) {
+        console.error(error);
+}});
 
 client.login(process.env.BOT_TOKEN);

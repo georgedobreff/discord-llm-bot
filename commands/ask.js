@@ -1,0 +1,1 @@
+// This will serve the same purpose as DMing the AI bot but as a command within a server.

@@ -21,6 +21,7 @@
   "homepage": "https://github.com/georgedobreff/discord-ai-chatbot#readme",
   "dependencies": {
     "discord.js": "^14.23.2",
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "groq-sdk": "^0.33.0"
   }
 }
