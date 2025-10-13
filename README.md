@@ -13,9 +13,9 @@ The bot uses the ```chat.completions``` framework so you can use any provider th
 ## Features (so far):
 
 * Private DMs including a welcome DM upon joining a server. <br>
-* * ```Discord requires users to share at least 1 common server with the bot for DMs to be initiated.```
+*Note*: ```Discord requires users to share at least 1 common server with the bot for DMs to be initiated.```
 
-* Multi-user conversations in a specific server channel. **
+* Multi-user conversations in a specific server channel.
 <br>
 
 * Separate configurable personalities for DMs and Server-wide bot.
@@ -23,18 +23,38 @@ The bot uses the ```chat.completions``` framework so you can use any provider th
 * Checks up on you after 3 hours of silence.
 
 * API keys rotation to ensure conversation continues after free tier limits are hit.<br>
-* * ``` You would need multiple accounts for this.```<br>
-* * If you just want one API key simply leave the rest blank.
-
-
-*I had web search enabled previously but I don't really think it's necessary for this bot so I removed that feature.*
+*``You would need multiple accounts or multiple providers with free tiers for this.If you can afford it by all means just pay to your chosen provider. This feature is here simply to ensure that the bot adheres to the goal of being free without compromising uptime too much.``*<br>
+ If you just want one API key simply leave the rest blank.
 
 
 ## Installation: 
 
+### Discord App Setup: 
+
+Visit <a href ='https://discord.com/developers/' target=_blank > Discord Developer Portal </a>, register and create an app.
+
+Go to Bot, Reset Token and make a note of your Bot Token.
+
+Enable Presence Intent, Server Members Intent and Message Content Intent permissions under Priviliged Gateway Intents.
+The specific Bot Permissions are up to you but you can just tick Administrator.
+
+Under OAuth2 copy and make a note of the Client ID. Under OAuth2 URL Generator tick "Bot" and copy the link at the bottom. Paste that in your browser and add the bot to your server.
+
+### API Keys:
+
+Go to <a href='https://console.groq.com/home' target = _blank> Groq.com </a> and register an account.
+
+Click API keys top right. Create API key and name it whatever you want. Make a note of the key.
+
+Repeat this whole process as many times as you want. The more API keys you have the longer the rotation can be, ensuring free usage of the models. 
+
+I still recommend you just sign up for the paid tier as Groq are offering a fantastic service and low prices.
+
+### Setting up the bot code:
+
 0. Clone the repo or download and extract zip
-1. Make sure you have <a href='https://nodejs.org/en/download'>Node.js</a> installed
-2. Edit the ```.env.example``` file and add your keys and IDs, then rename it to just ``.env``
+1. Make sure you have <a href='https://nodejs.org/en/download' target=_blank >Node.js</a> installed
+2. Edit the ```.env.example``` file and add your Bot Token, ClientID, and API key(s) then save the file as ``.env``
 3. Open a terminal in the project folder or navigate there
 4. Run ```npm install discord.js dotenv --save groq-sdk```
 5. Run ```npm start```
@@ -57,9 +77,9 @@ Edit the *config.js* file it is very straightforward.
 11. Define the prompt used to generate the check-in DM message.
 
 
-## If you want to host this on an android phone:
+## Hosting on an android phone:
 
-I'm running this bot on an old Samsung Galaxy S10e that I'm using for something else anyway so it's always on.
+Yeah.. believe it or not I'm running this on a Samsung Galaxy S10e that I'm using for something else anyway so it's always on and plugged in.
 
 1. Download Termux from the play store. Everything below is done inside the Termux app.
 2. ```termux-wake-lock```. This will ensure your Termux session runs in the background without the OS shutting it down.
@@ -75,6 +95,17 @@ I'm running this bot on an old Samsung Galaxy S10e that I'm using for something 
 
 It should be obvious that this will drain your battery quickly so I recommend you only do this if you have an old phone you don't use and you can keep plugged in.
 
-#### WARNING! ``` The default LLM model can engage in NSFW conversations! You've been warned! ```
+## WARNING!
 
-I recommend you use ```openai/gpt-oss-120b``` for stricter content filters.
+### The default LLM model can engage in NSFW conversations! You've been warned!
+
+If you don't want that I recommend you use ```openai/gpt-oss-120b``` for a lot stricter content filters or setting restrictions via the personality prompt (not recommended).
+
+
+### Planned feature updates:
+- One-on-One Voice calls using STT-TTS and maybe even in a server vc
+- Image generation
+- Server commands to perform different tasks like web searches, playing music, image generation, etc.
+- Vision capability a.k.a the bot responding to you sharing screen or turning on your camera.
+
+#### *Disclaimer: Exercise discretion when using this bot. I am not responsible for what you do with the code.*
