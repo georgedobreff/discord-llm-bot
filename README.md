@@ -1,20 +1,19 @@
 ## Discord AI Waifu
 
+<img src='./Lilly banner.png' height = 250px;>
+
+<br>
+
 **This is a work in progress and a practice project while I'm learning JS**
 
 The end goal is to have a ``` completely free ``` and customizable AI agent with chat, voice and image generation capabilities all inside a discord bot that you can add to your server. 
 
 The bot uses the ```chat.completions``` framework so you can use any provider that supports it.
 
-#### WARNING! ``` The default LLM model can engage in NSFW conversations! You've been warned! ```
-
-I recommend you use ```openai/gpt-oss-120b``` for stricter content filters.
-
 ## Features (so far):
 
 * Private DMs including a welcome DM upon joining a server. <br>
 * * ```Discord requires users to share at least 1 common server with the bot for DMs to be initiated.```
-<br>
 
 * Multi-user conversations in a specific server channel. **
 <br>
@@ -29,7 +28,6 @@ I recommend you use ```openai/gpt-oss-120b``` for stricter content filters.
 
 
 *I had web search enabled previously but I don't really think it's necessary for this bot so I removed that feature.*
-
 
 
 ## Installation: 
@@ -76,3 +74,7 @@ I'm running this bot on an old Samsung Galaxy S10e that I'm using for something 
 11. Run ```npm start```
 
 It should be obvious that this will drain your battery quickly so I recommend you only do this if you have an old phone you don't use and you can keep plugged in.
+
+#### WARNING! ``` The default LLM model can engage in NSFW conversations! You've been warned! ```
+
+I recommend you use ```openai/gpt-oss-120b``` for stricter content filters.
