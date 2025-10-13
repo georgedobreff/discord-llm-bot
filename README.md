@@ -1,29 +1,42 @@
-## Discord AI Bot
+## Discord AI Waifu
 
-**This is a work in progress**
+**This is a work in progress and a practice project while I'm learning JS**
 
-The end goal is to have a **completely free** AI agent with chat, web search, voice and image generation capabilities all inside a discord bot that you can add to your server.
+The end goal is to have a ``` completely free ``` and customizable AI agent with chat, voice and image generation capabilities all inside a discord bot that you can add to your server. 
 
-I'm doing this so I can practice JS and LLM implementation while making something cool.
+The bot uses the ```chat.completions``` framework so you can use any provider that supports it.
+
+#### WARNING! ``` The default LLM model can engage in NSFW conversations! You've been warned! ```
+
+I recommend you use ```openai/gpt-oss-120b``` for stricter content filters.
 
 ## Features (so far):
 
-### DM Features:
-1. Direct Messages with the bot, powered by ChatGPT.
-2. The A.I. remembers the last 10 messages from your conversation.
-3. The bot is capable of performing a web search.
-4. Max character limit for the LLM response to keep it fast.
+* Private DMs including a welcome DM upon joining a server. <br>
+* * ```Discord requires users to share at least 1 common server with the bot for DMs to be initiated.```
+<br>
 
-### Server Commands:
-1. ping. used for testing.
+* Multi-user conversations in a specific server channel. **
+<br>
 
-more commands to come soon.
+* Separate configurable personalities for DMs and Server-wide bot.
 
-## How to install:
+* Checks up on you after 3 hours of silence.
 
-0. Clone the repo or download and extract zip (duh)
+* API keys rotation to ensure conversation continues after free tier limits are hit.<br>
+* * ``` You would need multiple accounts for this.```<br>
+* * If you just want one API key simply leave the rest blank.
+
+
+*I had web search enabled previously but I don't really think it's necessary for this bot so I removed that feature.*
+
+
+
+## Installation: 
+
+0. Clone the repo or download and extract zip
 1. Make sure you have <a href='https://nodejs.org/en/download'>Node.js</a> installed
-2. Edit the *.env.example* file and add your keys and IDs, then rename it to just *.env*
+2. Edit the ```.env.example``` file and add your keys and IDs, then rename it to just ``.env``
 3. Open a terminal in the project folder or navigate there
 4. Run ```npm install discord.js dotenv --save groq-sdk```
 5. Run ```npm start```
@@ -34,9 +47,16 @@ Edit the *config.js* file it is very straightforward.
 
 #### You can:
 1. Set the AI's name
-2. Change the creator's name
+2. Set the llm model
 3. Set the max prior messages used for chat history
 4. Set the max characters for the LLMs response.
+5. Set how often the LLM will check-in on you.
+6. Set how often to check for inactive users (idleness).
+7. Set how often to log idle users.
+8. Define the personality for DMs.
+9. Define the personality for the server-side waifu.
+10. Define the name of the channel where you want the server-side waifu.
+11. Define the prompt used to generate the check-in DM message.
 
 
 ## If you want to host this on an android phone:

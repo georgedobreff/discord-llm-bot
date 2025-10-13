@@ -1,11 +1,44 @@
 require('dotenv').config();
-
-
-const Groq = require('groq-sdk');
-const groq = new Groq();
 const fs = require('fs');
 const path = require('path');
 const config = require('./config.js')
+const INTERACTION_FILE = path.join(__dirname, 'interactionTimes.json');
+let lastInteractionTime = new Map();
+const Groq = require('groq-sdk');
+
+const ALL_GROQ_KEYS = [
+    process.env.GROQ_API_KEY1,
+    process.env.GROQ_API_KEY2,
+    process.env.GROQ_API_KEY3,
+    process.env.GROQ_API_KEY4,
+    process.env.GROQ_API_KEY5,
+    process.env.GROQ_API_KEY6,
+    process.env.GROQ_API_KEY7
+].filter(key => key); // Filter out undefined/empty keys
+
+let currentKeyIndex = 0;
+
+function initializeGroqClient() {
+    if (ALL_GROQ_KEYS.length === 0) {
+        console.error("FATAL: No Groq API keys found in .env file.");
+        return null;
+    }
+    const apiKey = ALL_GROQ_KEYS[currentKeyIndex];
+    console.log(`🔑 Initializing Groq client with key index: ${currentKeyIndex + 1}`);
+    return new Groq({ apiKey });
+}
+
+let groq = initializeGroqClient();
+
+function rotateGroqKey() {
+    currentKeyIndex = (currentKeyIndex + 1) % ALL_GROQ_KEYS.length;
+    console.warn(`⚠️ Rate limit hit. Switching to key index: ${currentKeyIndex + 1}/${ALL_GROQ_KEYS.length}`);
+    groq = initializeGroqClient();
+    return groq;
+}
+const { RateLimitError } = require('groq-sdk/error');
+
+
 const { REST, Routes, DMChannel, ChannelType, WelcomeChannel} = require('discord.js');
 
 const deployCommands = async () => {
@@ -81,6 +114,12 @@ for (const file of commandFiles){
 client.once(Events.ClientReady, async () => {
     console.log(`Logged in as ${client.user.tag}`);
 
+    await loadInteractionData();
+    const SAVE_INTERVAL_MS = config.idleSave;
+    setInterval(saveInteractionData, SAVE_INTERVAL_MS);// Start the periodic save
+    const CHECK_INTERVAL_MS = config.idleCheck;
+    setInterval(checkIdleUsers, CHECK_INTERVAL_MS);//Start the periodic idle check
+
     // Deploy Commands
     await deployCommands();
     console.log('Commands deployed globally.');
@@ -140,55 +179,219 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
-// Welcoming message for user authorization
+// Welcoming message upon user authorization. Initiates DM.
 
 client.on(Events.GuildMemberAdd, async member => {
 
-    const user = member.user;
-    const welcomeText = `Hello, ${user.username}! Welcome to the server. I am ${config.llmName} your private AI assistant. Let's chat!`;
+    const user = member.displayName;
+    const welcomeText = `Hey ${user} 💋 How are you feeling?`;
 
     try {
         await user.send(welcomeText);
         
     } catch (error) {
-        console.warn(`Could not send welcome DM to ${user.tag}. They likely have DMs disabled.`);
+        console.warn(`Could not send welcome DM to ${user}. They likely have DMs disabled.`);
 
     }
 });
 
-// Groq API Logic
+// Re-Engagement DM logic:
+
+function fsPromise(fn, ...args) {
+    return new Promise((resolve, reject) => {
+        fn(...args, (err, data) => {
+            if (err) {
+                return reject(err);
+            }
+            resolve(data);
+        });
+    });
+}
+
+async function loadInteractionData() {
+    try {  
+        const data = await fsPromise(fs.readFile, INTERACTION_FILE, 'utf-8'); 
+        
+        const jsonObject = JSON.parse(data);
+        lastInteractionTime = new Map(Object.entries(jsonObject));
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            console.log("Interaction file not found. Initializing new file.");
+            await fsPromise(fs.writeFile, INTERACTION_FILE, '{}', 'utf-8'); 
+        } else {
+            console.error("Error loading interaction data:", error);
+        }
+    }
+}
+
+async function saveInteractionData() {
+    try {
+        const jsonObject = Object.fromEntries(lastInteractionTime);
+        const jsonString = JSON.stringify(jsonObject, null, 2);
+        
+        await fsPromise(fs.writeFile, INTERACTION_FILE, jsonString, 'utf-8'); 
+    } catch (error) {
+        console.error("❌ Error saving interaction data:", error);
+    }
+}
+
+const IDLE_TIME_MS = config.idleTimer;
+
+async function checkIdleUsers() {
+    const now = Date.now();
+    const idleUserIds = [];
+
+    for (const [userId, lastTime] of lastInteractionTime.entries()) {
+        const timeElapsed = now - lastTime;
+
+        if (timeElapsed >= IDLE_TIME_MS) {
+            idleUserIds.push(userId);
+        }
+    }
+
+    for (const userId of idleUserIds) {
+        try {
+            const user = await client.users.fetch(userId);
+            
+            const messages = config.idleLLMPrompt;
+
+            const chatCompletion = await llmCall(messages, config.llmModel);
+            const nudgeMessage = chatCompletion.choices[0].message.content;
+
+            await user.send(nudgeMessage);
+            
+            lastInteractionTime.set(userId, Date.now()); //Reset the idle timer
+
+        } catch (error) {
+            console.error(`Could not send re-engagement DM to user ID: ${userId}. Error:`, error);
+        }
+    }
+}
 
 
+// Main LLM Call function:
+
+async function llmCall(messages, model) {
+    const maxRetries = ALL_GROQ_KEYS.length;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        if (!groq) {
+            throw new Error("Groq client not initialized. Cannot make API call.");
+        }
+        
+        try {
+            const completion = await groq.chat.completions.create({
+                messages: messages,
+                model: model,
+            });
+            return completion;
+        } catch (error) {
+            if (error instanceof RateLimitError || error.status === 429) {
+                if (attempt < maxRetries - 1) {
+                    rotateGroqKey();
+                } else {
+                    // All keys exhausted
+                    console.error("🚨 All Groq API keys exhausted. Unable to fulfill request.");
+                    throw new Error("Rate limit reached across all available API keys.");
+                }
+            } else {
+                // Not a rate limit error
+                console.error("❌ Groq API encountered a non-rate-limit error:", error);
+                throw error;
+            }
+        }
+    }
+}
+
+// Response delay calculation
+
+function calculateDelay(responseText, msPer100Chars = 5000) {
+    if (!responseText) return 0;
+    
+    const delay = (responseText.length / 100) * msPer100Chars;
+    
+    const MAX_DELAY_MS = 10000; 
+    
+    return Math.min(delay, MAX_DELAY_MS);
+}
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+// LLM Logic for DMs:
 
 client.on(Events.MessageCreate, async userDM => {
    if(userDM.channel.type !== ChannelType.DM || userDM.guild !== null || userDM.author.bot){
     return;
    }
+   const userName = userDM.author.displayName;
+
+   const userId = userDM.author.id;
+   lastInteractionTime.set(userId, Date.now());//log interaction time
+
    const chatHistory = await userDM.channel.messages.fetch({ limit: config.historyLimit});
    const chatHistoryArray = Array.from(chatHistory.values()).reverse();
    try {
+    await delay(1200)
     await userDM.channel.sendTyping();
-    const chatCompletion = await groq.chat.completions.create({
-        messages: [
-            { role: 'system', content: config.llmPersona + 'This is the conversation history so far: ' + chatHistoryArray  },
+
+    const messages = [
+            { role: 'system', content: `This is the user's name: ${userName}. Refer to them by that name.
+             ${config.llmPersona}. This is the conversation history so far: ${chatHistoryArray}` },
             { role: 'user', content: userDM.content }
-        ],
-        // model: 'llama-3.1-8b-instant',
-          model: "openai/gpt-oss-20b",
-          tools: [
-                {
-                type: "browser_search"
-            }
-  ]
-    });
+        ];
+    
+    const chatCompletion = await llmCall(messages, config.llmModel);
+
     const responseText = chatCompletion.choices[0].message.content;
 
-    await userDM.reply(responseText);
+    const responseDelayMs = calculateDelay(responseText);
+    await delay(responseDelayMs);
+    
+    await userDM.channel.send(responseText);
 
 }
     catch (error) {
-        console.error(error);
+        console.error("Failed to generate DM response after all retries:", error);
+        userDM.channel.send("I'm so sorry babe something came up text me in 10mins 💋");
 }});
 
+// LLM Logic for Waifu Channel on Server:
+
+const waifuChannel = config.channelName;
+
+client.on(Events.MessageCreate, async waifu => {
+    if(waifu.channel.type === ChannelType.DM || waifu.guild === null || waifu.author.bot){
+    return;
+   }
+   if (waifu.channel.name.toLowerCase() !== waifuChannel.toLowerCase()) {
+        return;
+    }
+   const userName = waifu.author.displayName;
+   const chatHistory = await waifu.channel.messages.fetch({ limit: config.historyLimit});
+   const chatHistoryArray = Array.from(chatHistory.values()).reverse();
+   try {
+    await delay(1200)
+    await waifu.channel.sendTyping();
+    const messages = [
+            { role: 'system', content: `This is the current user's name: ${userName}. Refer to them by that name. 
+            ${config.sharedWaifu}. This is the conversation history so far: ${chatHistoryArray}` },
+            { role: 'user', content: waifu.content }
+        ];
+    const chatCompletion = await llmCall(messages, config.llmModel);
+    const responseText = chatCompletion.choices[0].message.content;
+
+    const responseDelayMs = calculateDelay(responseText);
+    await delay(responseDelayMs);
+
+    await waifu.channel.send(responseText);
+
+}
+    catch (error) {
+        console.error("Failed to generate DM response after all retries:", error);
+        userDM.channel.send("sorry boys I can't talk rn 🥺 ttys ok 💋");
+}});
 
 client.login(process.env.BOT_TOKEN);
