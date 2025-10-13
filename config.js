@@ -5,8 +5,8 @@ const historyLimit = 30; // how far back does the LLM remember the conversation
 const characterLimit = 200; // maximum number of characters for the LLM's response.
 const llmModel = 'llama-3.3-70b-versatile'; // make sure you use GROQ.com listed models.
 
-const idleTimer = 3 * 60 * 60 * 1000; // Default 2hrs. Idle time before your waifu DMs you.
-const idleCheck = 60 * 60 * 1000; // Default 1hr. How often to check for idle users
+const idleTimer = 3 * 60 * 60 * 1000; // Default 3hrs. Idle time before your waifu DMs you.
+const idleCheck = 15 * 60 * 1000; // Default 15mins. How often to check for idle users
 const idleSave = 10 * 60 * 1000;  // Default 10mins. How often do we save the idle users data.
 
 const channelName = 'waifu'; // The name of the channel where you want your Server-wide Waifu.
