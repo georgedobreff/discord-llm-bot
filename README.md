@@ -16,7 +16,6 @@ The bot uses the ```chat.completions``` framework so you can use any provider th
 *Note*: ```Discord requires users to share at least 1 common server with the bot for DMs to be initiated.```
 
 * Multi-user conversations in a specific server channel.
-<br>
 
 * Separate configurable personalities for DMs and Server-wide bot.
 
@@ -108,4 +107,4 @@ If you don't want that I recommend you use ```openai/gpt-oss-120b``` for a lot s
 - Server commands to perform different tasks like web searches, playing music, image generation, etc.
 - Vision capability a.k.a the bot responding to you sharing screen or turning on your camera.
 
-#### *Disclaimer: Exercise discretion when using this bot. I am not responsible for what you do with the code.*
+#### *Disclaimer: Exercise discretion when using this bot. I am not responsible for what you do with it.*
