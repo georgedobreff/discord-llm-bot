@@ -10,6 +10,9 @@ const llmName = 'Lilly'; // the AI's name
 const historyLimit = 100; // how far back does the LLM remember the conversation
 const characterLimit = 200; // maximum number of characters for the LLM's response.
 const llmModel = 'llama-3.3-70b-versatile'; // make sure you use GROQ.com listed models.
+const searchModel = 'openai/gpt-oss-120b' // model used for web searches
+const searchCharacterLimit = 500; // higher response limit for searches
+
 
 const idleTimer = 3 * 60 * 60 * 1000 + (Math.random() * 10); // Default 3hrs. Idle time before your waifu DMs you.
 const idleCheck = 15 * 60 * 1000; // Default 15mins. How often to check for idle users
@@ -71,5 +74,7 @@ module.exports = {
     channelName,
     ACTIVITY_TYPE,
     ACTIVITY_NAME,
-    BOT_STATUS
+    BOT_STATUS,
+    searchCharacterLimit,
+    searchModel
 };

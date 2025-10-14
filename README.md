@@ -58,7 +58,7 @@ I still recommend you just sign up for the paid tier as Groq are offering a fant
 1. Make sure you have <a href='https://nodejs.org/en/download' target=_blank >Node.js</a> installed
 2. Edit the ```.env.example``` file and add your Bot Token, ClientID, and API key(s) then save the file as ``.env``
 3. Open a terminal in the project folder or navigate there
-4. Run ```npm install discord.js dotenv --save groq-sdk```
+4. Run ```npm install``` to install all dependencies
 5. Run ```npm start```
 
 ## LLM Customization:
