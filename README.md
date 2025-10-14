@@ -17,6 +17,8 @@ The bot uses the ```chat.completions``` framework so you can use any provider th
 
 * Multi-user conversations in a specific server channel. Skips some messages like a human would.
 
+* Web search via ```/search``` command.
+
 * Artificial delay based on response length to simulate typing.
 
 * Separate configurable personalities for DMs and Server-wide bot.
@@ -78,6 +80,7 @@ Edit the *config.js* file it is very straightforward.
 10. Define the name of the channel where you want the server-side waifu.
 11. Define the prompt used to generate the check-in DM message.
 12. Set the bot activity and status on Discord.
+13. Change the LLM used for web search.
 
 
 ## WARNING!
