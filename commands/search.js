@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { Groq, RateLimitError } = require('groq-sdk'); 
-const config = require('../config'); // Import config to get the search model
+const config = require('../config');
 
 // API Keys Management
 
@@ -20,8 +20,6 @@ if (ALL_GROQ_KEYS.length === 0) {
     }
 
 let currentKeyIndex = 0;
-
-
 
 module.exports = {
 
@@ -83,15 +81,15 @@ module.exports = {
                         
                     }
                     else {
-                        // This is the last attempt and it failed.
+                      
                         console.error("🚨 Rate limit reached across all available API keys.");
                         await interaction.editReply({ 
                             content: "🚨 Rate limit reached across all available API keys. Try again later.", 
                         });
-                        return; // Exit the function after the final failure message.
+                        return
                     }
                 } else {
-                    // Handle other errors
+                    
                     console.error('❌ Error executing /search:', error);
                     await interaction.editReply({ 
                         content: "Something's wrong I can't search right now. Try again in a bit :kiss:", 
