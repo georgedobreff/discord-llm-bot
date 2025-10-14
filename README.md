@@ -23,7 +23,10 @@ The bot uses the ```chat.completions``` framework so you can use any provider th
 
 * Separate configurable personalities for DMs and Server-wide bot.
 
+
 * Checks up on you after 3 hours of silence.
+
+* User-specific memory system. Let your waifu remember things about you. /memories /remember /forget commands to manage the memory. Only usable in DMs to protect user's info.
 
 * API keys rotation to ensure conversation continues after free tier limits are hit.<br>
 *``You would need multiple accounts or multiple providers with free tiers for this.If you can afford it by all means just pay to your chosen provider. This feature is here simply to ensure that the bot adheres to the goal of being free without compromising uptime too much.``*<br>
