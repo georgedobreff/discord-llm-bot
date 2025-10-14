@@ -15,7 +15,9 @@ The bot uses the ```chat.completions``` framework so you can use any provider th
 * Private DMs including a welcome DM upon joining a server. <br>
 *Note*: ```Discord requires users to share at least 1 common server with the bot for DMs to be initiated.```
 
-* Multi-user conversations in a specific server channel.
+* Multi-user conversations in a specific server channel. Skips some messages like a human would.
+
+* Artificial delay based on response length to simulate typing.
 
 * Separate configurable personalities for DMs and Server-wide bot.
 
@@ -24,6 +26,7 @@ The bot uses the ```chat.completions``` framework so you can use any provider th
 * API keys rotation to ensure conversation continues after free tier limits are hit.<br>
 *``You would need multiple accounts or multiple providers with free tiers for this.If you can afford it by all means just pay to your chosen provider. This feature is here simply to ensure that the bot adheres to the goal of being free without compromising uptime too much.``*<br>
  If you just want one API key simply leave the rest blank.
+
 
 
 ## Installation: 
@@ -74,25 +77,8 @@ Edit the *config.js* file it is very straightforward.
 9. Define the personality for the server-side waifu.
 10. Define the name of the channel where you want the server-side waifu.
 11. Define the prompt used to generate the check-in DM message.
+12. Set the bot activity and status on Discord.
 
-
-## Hosting on an android phone:
-
-Yeah.. believe it or not I'm running this on a Samsung Galaxy S10e that I'm using for something else anyway so it's always on and plugged in.
-
-1. Download Termux from the play store. Everything below is done inside the Termux app.
-2. ```termux-wake-lock```. This will ensure your Termux session runs in the background without the OS shutting it down.
-3. ```pkg update``` and ```pkg upgrade```
-4. ```pkg install nodejs```
-5. ```pkg install git```
-6. ```git clone https://github.com/georgedobreff/discord-ai-chatbot.git```
-7. ```cd discord-ai-chatbot```
-8. ```nano .env.example``` This is painful to edit on a phone but I believe in you.
-9. Save the edited file as .env only and exit the editor
-10. Run ```npm install discord.js dotenv --save groq-sdk```
-11. Run ```npm start```
-
-It should be obvious that this will drain your battery quickly so I recommend you only do this if you have an old phone you don't use and you can keep plugged in.
 
 ## WARNING!
 
