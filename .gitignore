@@ -3,3 +3,9 @@ node_modules
 package-lock.json
 interactionTimes.json
 user_memories
+user_speech
+tts_output
+tts_queue
+google-credentials.json
+voice_history
+

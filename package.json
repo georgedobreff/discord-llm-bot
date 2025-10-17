@@ -21,6 +21,7 @@
   "homepage": "https://github.com/georgedobreff/discord-ai-chatbot#readme",
   "dependencies": {
     "@discordjs/voice": "^0.19.0",
+    "@google-cloud/text-to-speech": "^6.3.1",
     "@snazzah/davey": "^0.1.7",
     "discord.js": "^14.23.2",
     "dotenv": "^17.2.3",
