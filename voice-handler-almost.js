@@ -1,4 +1,5 @@
 // voice-handler.js
+// voice-handler.js
 
 const {
   entersState,
@@ -17,7 +18,6 @@ const Groq = require('groq-sdk');
 const config = require('./config.js');
 const prism = require('prism-media');
 const { pipeline } = require('stream');
-const wav = require('wav');
 
 // --- Directory Setup ---
 const USER_SPEECH_DIR = path.join(__dirname, 'user_speech');
@@ -61,13 +61,13 @@ let audioPlayer = null;
 let ttsQueue = [];
 let isPlaying = false;
 let currentConnection = null;
-const userRecordingState = new Map();
+const userRecordingState = new Map(); // <<< FIX: Lock to prevent multiple recordings
 
 function resetState() {
   if (audioPlayer) {
     audioPlayer.stop(true);
+    audioPlayer = null;
   }
-  audioPlayer = null;
   ttsQueue = [];
   isPlaying = false;
   currentConnection = null;
@@ -115,33 +115,30 @@ function handleVoiceConnection(connection, interaction) {
   const receiver = connection.receiver;
 
   receiver.speaking.on('start', (userId) => {
+    // --- FIX: Check if we are already recording this user ---
     if (userRecordingState.get(userId)) {
-      return;
+      return; // Ignore if already recording
     }
 
     const user = interaction.client.users.cache.get(userId);
     if (user && !user.bot) {
+      // --- FIX: Set the lock to true ---
       userRecordingState.set(userId, true);
       console.log(`🎤 ${user.username} started speaking. (Recording started)`);
 
       const audioFilePath = path.join(USER_SPEECH_DIR, `${userId}.wav`);
       const opusStream = receiver.subscribe(userId, {
-        // <<< FIX 1: Shortened silence duration
-        end: { behavior: EndBehaviorType.AfterSilence, duration: 750 },
+        end: { behavior: EndBehaviorType.AfterSilence, duration: 1500 },
       });
 
       const pcmStream = opusStream.pipe(new prism.opus.Decoder({ rate: 48000, channels: 2, frameSize: 960 }));
+      const outStream = fsSync.createWriteStream(audioFilePath);
 
-      const wavWriter = new wav.FileWriter(audioFilePath, {
-        channels: 2,
-        sampleRate: 48000,
-        bitDepth: 16
-      });
-
-      pipeline(pcmStream, wavWriter, (err) => {
+      pipeline(pcmStream, outStream, (err) => {
+        // --- FIX: Release the lock once the file is written ---
         userRecordingState.set(userId, false);
         if (err) {
-          console.error(`❌ Error writing WAV file for ${user.username}:`, err);
+          console.error(`❌ Error writing audio file for ${user.username}:`, err);
         } else {
           console.log(`🔊 Finished recording for ${user.username}.`);
           processAudio(userId, user.username);
@@ -151,17 +148,15 @@ function handleVoiceConnection(connection, interaction) {
   });
 }
 
+
 async function processAudio(userId, userName) {
   const audioFilePath = path.join(USER_SPEECH_DIR, `${userId}.wav`);
 
   try {
+    // Ensure file has content before sending
     const stats = await fs.stat(audioFilePath);
-    const fileSizeInBytes = stats.size;
-    // <<< FIX 2: Increased minimum file size threshold to 12KB
-    const minimumFileSize = 12288;
-
-    if (fileSizeInBytes < minimumFileSize) {
-      console.warn(`🗑️ Discarding silent/short audio file for ${userName}. Size: ${fileSizeInBytes} bytes.`);
+    if (stats.size === 0) {
+      console.warn(`Skipping empty audio file for ${userName}.`);
       return;
     }
 
@@ -225,8 +220,8 @@ async function playNextInQueue() {
 
   try {
     const response = await groq.audio.speech.create({
-      model: "playai-tts",
-      voice: "Deedee-PlayAI",
+      model: "playai-tts-1",
+      voice: "nova",
       input: textToSpeak,
       response_format: "wav",
     });

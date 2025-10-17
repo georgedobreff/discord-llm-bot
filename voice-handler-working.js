@@ -17,7 +17,7 @@ const Groq = require('groq-sdk');
 const config = require('./config.js');
 const prism = require('prism-media');
 const { pipeline } = require('stream');
-const wav = require('wav');
+const wav = require('wav'); // <<< NEW: Import the wav package
 
 // --- Directory Setup ---
 const USER_SPEECH_DIR = path.join(__dirname, 'user_speech');
@@ -126,12 +126,12 @@ function handleVoiceConnection(connection, interaction) {
 
       const audioFilePath = path.join(USER_SPEECH_DIR, `${userId}.wav`);
       const opusStream = receiver.subscribe(userId, {
-        // <<< FIX 1: Shortened silence duration
-        end: { behavior: EndBehaviorType.AfterSilence, duration: 750 },
+        end: { behavior: EndBehaviorType.AfterSilence, duration: 1000 }, // Shortened duration slightly
       });
 
       const pcmStream = opusStream.pipe(new prism.opus.Decoder({ rate: 48000, channels: 2, frameSize: 960 }));
 
+      // --- FIX: Use wav.FileWriter to create a valid WAV file ---
       const wavWriter = new wav.FileWriter(audioFilePath, {
         channels: 2,
         sampleRate: 48000,
@@ -151,17 +151,14 @@ function handleVoiceConnection(connection, interaction) {
   });
 }
 
+
 async function processAudio(userId, userName) {
   const audioFilePath = path.join(USER_SPEECH_DIR, `${userId}.wav`);
 
   try {
     const stats = await fs.stat(audioFilePath);
-    const fileSizeInBytes = stats.size;
-    // <<< FIX 2: Increased minimum file size threshold to 12KB
-    const minimumFileSize = 12288;
-
-    if (fileSizeInBytes < minimumFileSize) {
-      console.warn(`🗑️ Discarding silent/short audio file for ${userName}. Size: ${fileSizeInBytes} bytes.`);
+    if (stats.size < 44) { // A WAV header is 44 bytes, so anything less is invalid
+      console.warn(`Skipping empty or invalid audio file for ${userName}.`);
       return;
     }
 
@@ -226,7 +223,7 @@ async function playNextInQueue() {
   try {
     const response = await groq.audio.speech.create({
       model: "playai-tts",
-      voice: "Deedee-PlayAI",
+      voice: "Celeste-PlayAI",
       input: textToSpeak,
       response_format: "wav",
     });
