@@ -36,7 +36,7 @@ async function setupDirectories() {
 }
 setupDirectories();
 
-// GROQ KEYS
+// Groq Keys
 const ALL_GROQ_KEYS = [
   process.env.GROQ_API_KEY1, process.env.GROQ_API_KEY2, process.env.GROQ_API_KEY3,
   process.env.GROQ_API_KEY4, process.env.GROQ_API_KEY5, process.env.GROQ_API_KEY6,
@@ -44,7 +44,7 @@ const ALL_GROQ_KEYS = [
 ].filter(key => key);
 
 if (ALL_GROQ_KEYS.length === 0) {
-  console.error("Add at least one GROQ_API_KEY to your .env file for voice features.");
+  console.error("Please add an API_KEY to your .env file for voice features.");
 }
 
 let currentKeyIndex = 0;
@@ -56,12 +56,14 @@ function rotateGroqKey() {
   groq = new Groq({ apiKey: ALL_GROQ_KEYS[currentKeyIndex] });
 }
 
-// --- Single Session State Management ---
+// State management
+
 let audioPlayer = null;
 let ttsQueue = [];
 let isPlaying = false;
 let currentConnection = null;
 const userRecordingState = new Map();
+const userProcessingState = new Map();
 
 function resetState() {
   if (audioPlayer) {
@@ -72,10 +74,11 @@ function resetState() {
   isPlaying = false;
   currentConnection = null;
   userRecordingState.clear();
+  userProcessingState.clear();
   console.log("Voice state has been reset.");
 }
 
-// --- Main Voice Connection Handler ---
+// Main voice handling
 function handleVoiceConnection(connection, interaction) {
   if (currentConnection) {
     currentConnection.destroy();
@@ -118,10 +121,15 @@ function handleVoiceConnection(connection, interaction) {
     if (userRecordingState.get(userId)) {
       return;
     }
+    if (userProcessingState.get(userId)) {
+      console.log(`Already responding to user's speech. Ignoring new one.`);
+      return;
+    }
 
     const user = interaction.client.users.cache.get(userId);
     if (user && !user.bot) {
       userRecordingState.set(userId, true);
+      userProcessingState.set(userId, true);
       console.log(`🎤 ${user.username} started speaking. (Recording started)`);
 
       const audioFilePath = path.join(USER_SPEECH_DIR, `${userId}.wav`);
@@ -140,9 +148,10 @@ function handleVoiceConnection(connection, interaction) {
       pipeline(pcmStream, wavWriter, (err) => {
         userRecordingState.set(userId, false);
         if (err) {
-          console.error(`❌ Error writing WAV file for ${user.username}:`, err);
+          console.error(`Error writing WAV file for ${user.username}:`, err);
+          userProcessingState.set(userId, false);
         } else {
-          console.log(`🔊 Finished recording for ${user.username}.`);
+          console.log(`Finished recording for ${user.username}.`);
           processAudio(userId, user.username);
         }
       });
@@ -156,10 +165,10 @@ async function processAudio(userId, userName) {
   try {
     const stats = await fs.stat(audioFilePath);
     const fileSizeInBytes = stats.size;
-    const minimumFileSize = 12288; // 12KB
+    const minimumFileSize = 19500;
 
     if (fileSizeInBytes < minimumFileSize) {
-      console.warn(`🗑️ Discarding silent/short audio file for ${userName}. Size: ${fileSizeInBytes} bytes.`);
+      console.warn(`Discarding silent/short audio file for ${userName}.`);
       return;
     }
 
@@ -168,10 +177,18 @@ async function processAudio(userId, userName) {
       model: "whisper-large-v3",
     });
     const transcriptionText = transcription.text;
-    console.log(`📝 Transcription for ${userName}: "${transcriptionText}"`);
+    console.log(`Transcription for ${userName}: "${transcriptionText}"`);
 
-    if (!transcriptionText || transcriptionText.trim().length === 0 || transcriptionText === " you" || transcriptionText === " Thank you.") {
-      console.log("Transcription is empty, skipping LLM call.");
+    const triggerPhrase = `${config.voiceTriggerPhrase}`;
+
+    if (!transcriptionText || transcriptionText.trim().length <= 3) {
+      console.log("Transcription is empty.");
+      return;
+    }
+
+
+    if (!transcriptionText.trim().toLowerCase().includes(triggerPhrase)) {
+      console.log(`No trigger phrase for "${userName}'s speech`);
       return;
     }
 
@@ -193,7 +210,7 @@ async function processAudio(userId, userName) {
 
     const completion = await llmCall(messages, config.llmModel);
     const responseText = completion.choices[0].message.content;
-    console.log(`🤖 LLM Response for ${userName}: "${responseText}"`);
+    console.log(`Replying to ${userName}: "${responseText}"`);
 
     voiceHistory.push({
       userId: 'BOT',
@@ -201,8 +218,6 @@ async function processAudio(userId, userName) {
       text: responseText
     });
     await fs.writeFile(historyFilePath, JSON.stringify(voiceHistory, null, 2));
-
-    // Clean text of asterisks *before* sending to TTS
     const cleanedTextForTTS = responseText.replace(/\*.*?\*/g, '').trim();
 
     if (cleanedTextForTTS) {
@@ -213,11 +228,12 @@ async function processAudio(userId, userName) {
     }
 
   } catch (error) {
-    console.error("❌ Error during audio processing pipeline:", error);
+    console.error("Error during audio processing pipeline:", error);
+  } finally {
+    userProcessingState.set(userId, false);
   }
 }
 
-// <<< THIS FUNCTION IS NOW UPDATED FOR GEMINI-TTS >>>
 async function playNextInQueue() {
   if (isPlaying || ttsQueue.length === 0 || !audioPlayer) {
     return;
@@ -225,23 +241,20 @@ async function playNextInQueue() {
 
   isPlaying = true;
   const textToSpeak = ttsQueue.shift();
-  const ttsFilePath = path.join(TTS_OUTPUT_DIR, `tts_output.wav`); // Google TTS outputs WAV as LINEAR16
+  const ttsFilePath = path.join(TTS_OUTPUT_DIR, `tts_output.wav`);
 
   try {
-    // Construct the Google TTS request
     const request = {
-      prompt: 'Do NOT use EMOJIS!!! Speak with emotion based on what you are saying.',
+      prompt: `${config.ttsPrompt}`,
       input: { text: textToSpeak },
-      // This is a Gemini "Studio" voice. 
-      // You can find a full list here: https://cloud.google.com/text-to-speech/docs/voices-list
       voice: { languageCode: 'en-US', name: 'en-US-Chirp-HD-F' },
       audioConfig: {
-        audioEncoding: 'LINEAR16', // This is a .wav format
-        sampleRateHertz: 24000 // Studio voices use 24000Hz
+        audioEncoding: 'LINEAR16',
+        sampleRateHertz: 24000
       },
     };
 
-    // Performs the text-to-speech request
+
     const [response] = await ttsClient.synthesizeSpeech(request);
 
     // Write the binary audio content to a local file
@@ -252,7 +265,7 @@ async function playNextInQueue() {
     audioPlayer.play(resource);
 
   } catch (error) {
-    console.error(`❌ Failed to generate or play Google TTS:`, error);
+    console.error(`Failed to generate or play Google TTS:`, error);
     isPlaying = false;
     playNextInQueue();
   }

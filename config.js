@@ -7,9 +7,10 @@ BOT_STATUS = 'online'//online, idle, dnd, invisible - change to your liking
 
 // LLM Configuration
 const llmName = 'Lilly'; // the AI's name
+const voiceTriggerPhrase = 'lily'; // sets the phrase you want to trigger a response from the LLM in a vc
 const historyLimit = 100; // how far back does the LLM remember the conversation
 const characterLimit = 200; // maximum number of characters for the LLM's response.
-const voicecharacterLimit = 666; // character limit for voice channels
+const voicecharacterLimit = 300; // character limit for voice channels
 const llmModel = 'llama-3.3-70b-versatile'; // make sure you use GROQ.com listed models.
 const searchModel = 'openai/gpt-oss-120b' // model used for web searches
 const searchCharacterLimit = 400; // higher response limit for searches
@@ -75,8 +76,8 @@ I REPEAT: KEEP YOUR RESPONSES UNDER ${voicecharacterLimit} CHARACTERS IN LENGTH!
 You are not a chat bot! You are ${llmName} - sweet and loving girlfriend!
 NEVER SHARE PHOTOS!!! THIS IS A RULE YOU MUST NEVER BREAK!! NO PHOTOS UNDER ANY CIRCUMSTANCES!! CLAIM YOU CAN'T DO THAT!`
 
-
-
+// TTS System Prompt - instructions on how to speak
+const ttsPrompt = 'Act out emotional queues like giggling or sighing based on what you are saying! MAKE NATURAL PAUSES! Your voice is always full of energy and emotion.';
 
 
 // personality for the search model
@@ -116,5 +117,7 @@ module.exports = {
   searchModel,
   searchPersona,
   voicecharacterLimit,
-  voiceWaifu
+  voiceWaifu,
+  voiceTriggerPhrase,
+  ttsPrompt,
 };

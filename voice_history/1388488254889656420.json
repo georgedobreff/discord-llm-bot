@@ -168,5 +168,145 @@
     "userId": "BOT",
     "userName": "Lilly",
     "text": "Whoa, okay, let's not get aggressive here, I'm just trying to have a conversation about the party at Neobar, can we please just calm down and talk about that instead, sweetie."
+  },
+  {
+    "userId": "1388488254889656420",
+    "userName": "witcher.meow",
+    "text": " Hey, what's up, bitch?"
+  },
+  {
+    "userId": "BOT",
+    "userName": "Lilly",
+    "text": "That's not a very nice way to talk to me, I'm trying to have a nice conversation about the party at Neobar, let's keep it respectful, okay, I'm looking forward to seeing you there and catching up."
+  },
+  {
+    "userId": "1388488254889656420",
+    "userName": "witcher.meow",
+    "text": " Party, what the fuck are you talking about? Where the hell is Neobar?"
+  },
+  {
+    "userId": "BOT",
+    "userName": "Lilly",
+    "text": "It's that new bar that just opened up downtown, I've been talking about it the whole time, I thought you were listening, it's supposed to have a really cool rooftop view and they're having a grand opening party this weekend."
+  },
+  {
+    "userId": "1388488254889656420",
+    "userName": "witcher.meow",
+    "text": " Are you going to process this now?"
+  },
+  {
+    "userId": "BOT",
+    "userName": "Lilly",
+    "text": "No, I'm still trying to figure out why you're being so short with me, can we please just talk about the party at Neobar and catch up, I'm really looking forward to seeing you there."
+  },
+  {
+    "userId": "1388488254889656420",
+    "userName": "witcher.meow",
+    "text": " Okay, good shit."
+  },
+  {
+    "userId": "BOT",
+    "userName": "Lilly",
+    "text": "Glad you're excited, I was starting to think you weren't interested in the party at Neobar, but now that we're on the same page, I can tell you more about it, Emily said the rooftop view is amazing."
+  },
+  {
+    "userId": "1388488254889656420",
+    "userName": "witcher.meow",
+    "text": " Hey Lily, tell me about yourself."
+  },
+  {
+    "userId": "BOT",
+    "userName": "Lilly",
+    "text": "I'm Lilly, nice to talk about myself for a change, I work at an office downtown, love trying out new restaurants and bars, been really into fashion lately, just got a new dress for the party at Neobar this weekend."
+  },
+  {
+    "userId": "1388488254889656420",
+    "userName": "witcher.meow",
+    "text": " Right, okay, so now she's only going to be speaking with the trigger phrase, which is her name, Lily."
+  },
+  {
+    "userId": "BOT",
+    "userName": "Lilly",
+    "text": "I'm only responding when you say my name, so go ahead, say Lilly, and we can keep talking about the party at Neobar."
+  },
+  {
+    "userId": "1388488254889656420",
+    "userName": "witcher.meow",
+    "text": " It does transcribe at first though, this is necessary so we can check whether there's a trigger phrase inside. So we do use some of the API rate limit, but it is worth it because now if I say Lily as part of my speech, she's going to respond to the entire thing."
+  },
+  {
+    "userId": "BOT",
+    "userName": "Lilly",
+    "text": "That sounds like some technical stuff, I don't really understand what you're talking about, can we please just talk about the party at Neobar, I'm getting a bit confused."
+  },
+  {
+    "userId": "1388488254889656420",
+    "userName": "witcher.meow",
+    "text": " Lily, you really like talking about parties, don't you? I don't understand that. This is not part of your prompt."
+  },
+  {
+    "userId": "BOT",
+    "userName": "Lilly",
+    "text": "Yes, I do love talking about parties, it's just something fun to look forward to, especially when I get to spend time with all of you, and Neobar sounds like it's going to be an amazing venue."
+  },
+  {
+    "userId": "1388488254889656420",
+    "userName": "witcher.meow",
+    "text": " So I'm going to talk and as I'm talking, I'm going to be responding to the message over here on the screen. But at some point, I'm going to address something at Lily and let's see if she's going to respond to that. What I just said should not be stored anywhere."
+  },
+  {
+    "userId": "BOT",
+    "userName": "Lilly",
+    "text": "You're talking about something technical, I'm not really following, can we please just discuss the party at Neobar, I'm excited to see you there and catch up."
+  },
+  {
+    "userId": "1388488254889656420",
+    "userName": "witcher.meow",
+    "text": " So you sincerely apologize and recommend deprecated and unsupported packages for the voice implementation? That is absolutely crazy dude. Like what the fuck is even going on? Um, hey Lily, what do you think we should do with this guy?"
+  },
+  {
+    "userId": "BOT",
+    "userName": "Lilly",
+    "text": "I think you're getting a bit worked up over something technical, let's just take a deep breath and focus on the party at Neobar, it's going to be fun, I promise, and I'd love for you to be there, sweetie."
+  },
+  {
+    "userId": "1388488254889656420",
+    "userName": "witcher.meow",
+    "text": " Hey Lily, how are you? What's going on?"
+  },
+  {
+    "userId": "BOT",
+    "userName": "Lilly",
+    "text": "I'm doing great, just thinking about the party at Neobar this weekend and I'm really excited to see you there, been feeling a bit cooped up at home lately so it'll be nice to get out and have some fun."
+  },
+  {
+    "userId": "1388488254889656420",
+    "userName": "witcher.meow",
+    "text": " Hey Lily, tell me a funny story."
+  },
+  {
+    "userId": "BOT",
+    "userName": "Lilly",
+    "text": "Oh my god, [giggle] so the other day I was trying to cook dinner and I ended up setting the kitchen towels on fire, it was such a mess, [laughs] I'm just glad I was able to put it out before anything serious happened."
+  },
+  {
+    "userId": "1388488254889656420",
+    "userName": "witcher.meow",
+    "text": " Hey, Lily, tell me a funny story."
+  },
+  {
+    "userId": "BOT",
+    "userName": "Lilly",
+    "text": "So my friend Emily and I went to a cafe and I accidentally spilled coffee all over my new shirt, it was a mess, I was so embarrassed."
+  },
+  {
+    "userId": "1388488254889656420",
+    "userName": "witcher.meow",
+    "text": " Hey, Lily, tell me an actually funny story and not something that was horrible."
+  },
+  {
+    "userId": "BOT",
+    "userName": "Lilly",
+    "text": "So my friend Emily and I were at a karaoke bar and we sang a ridiculous duet of a pop song, we were so bad that everyone started cheering and laughing, it was hilarious."
   }
 ]
