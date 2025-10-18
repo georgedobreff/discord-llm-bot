@@ -283,7 +283,6 @@ async function saveWaveFile(
 }
 
 
-// <<< NEW: Replaced with the GenAI API call
 async function playNextInQueue() {
   if (isPlaying || ttsQueue.length === 0 || !audioPlayer) {
     return;
