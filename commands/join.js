@@ -1,11 +1,11 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { joinVoiceChannel, VoiceConnectionStatus, entersState, getVoiceConnection } = require('@discordjs/voice');
 const { handleVoiceConnection } = require('../voice-handler-gemini.js');
-
+const config = require('../config.js');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('join')
-    .setDescription(`Lilly joins the vc you're currently in.`),
+    .setDescription(`${config.llmName} joins the vc you're currently in.`),
 
   async execute(interaction) {
     const channel = interaction.member.voice.channel;

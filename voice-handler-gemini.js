@@ -163,14 +163,6 @@ async function processAudio(userId, userName) {
   const audioFilePath = path.join(USER_SPEECH_DIR, `${userId}.wav`);
 
   try {
-    const stats = await fs.stat(audioFilePath);
-    const fileSizeInBytes = stats.size;
-    const minimumFileSize = 19500;
-
-    if (fileSizeInBytes < minimumFileSize) {
-      console.warn(`Discarding silent/short audio file for ${userName}.`);
-      return;
-    }
 
     const transcription = await groq.audio.transcriptions.create({
       file: fsSync.createReadStream(audioFilePath),
@@ -179,18 +171,18 @@ async function processAudio(userId, userName) {
     const transcriptionText = transcription.text;
     console.log(`Transcription for ${userName}: "${transcriptionText}"`);
 
-    const triggerPhrase = `${config.voiceTriggerPhrase}`;
+    // const triggerPhrase = `${config.voiceTriggerPhrase}`;
 
     if (!transcriptionText || transcriptionText.trim().length <= 3) {
-      console.log("Transcription is empty.");
+      console.log("Empty or too short. Ignoring speech.");
       return;
     }
 
 
-    if (!transcriptionText.trim().toLowerCase().includes(triggerPhrase)) {
-      console.log(`No trigger phrase for "${userName}'s speech`);
-      return;
-    }
+    // if (!transcriptionText.trim().toLowerCase().includes(triggerPhrase)) {
+    // console.log(`No trigger phrase for "${userName}'s speech`);
+    // return;
+    // }
 
     const historyFilePath = path.join(VOICE_HISTORY_DIR, `${userId}.json`);
     let voiceHistory = [];
@@ -203,28 +195,43 @@ async function processAudio(userId, userName) {
     voiceHistory.push({ userId, userName, text: transcriptionText });
     const formattedHistory = voiceHistory.map(entry => `${entry.userName}: ${entry.text}`).join('\n');
 
-    const messages = [
-      { role: 'system', content: `${config.voiceWaifu} This is the current voice conversation history:\n${formattedHistory}` },
+    const evaluator = [
+      { role: 'system', content: `Your purpose is to evaluate whether this conversation needs a response from ${config.llmName}. Reply with ONLY "yes" or "no". This is the conversation:\n${formattedHistory}` },
       { role: 'user', content: transcriptionText }
     ];
 
-    const completion = await llmCall(messages, config.llmModel);
-    const responseText = completion.choices[0].message.content;
-    console.log(`Replying to ${userName}: "${responseText}"`);
+    const evaluatorDecisionCall = await llmCall(evaluator, config.llmModel);
+    const evaluatorDecision = evaluatorDecisionCall.choices[0].message.content;
+    console.log(`Evaluator decision: "${evaluatorDecision}"`);
 
-    voiceHistory.push({
-      userId: 'BOT',
-      userName: config.llmName,
-      text: responseText
-    });
-    await fs.writeFile(historyFilePath, JSON.stringify(voiceHistory, null, 2));
-    const cleanedTextForTTS = responseText.replace(/\*.*?\*/g, '').trim();
+    if (evaluatorDecision.includes('yes')) {
+      const messages = [
+        { role: 'system', content: `${config.voiceWaifu} This is the conversation history:\n${formattedHistory}` },
+        { role: 'user', content: transcriptionText }
+      ];
 
-    if (cleanedTextForTTS) {
-      ttsQueue.push(cleanedTextForTTS);
-      if (!isPlaying) {
-        playNextInQueue();
+      const completion = await llmCall(messages, config.llmModel);
+      const responseText = completion.choices[0].message.content;
+      console.log(`Replying to ${userName}: "${responseText}"`);
+
+      voiceHistory.push({
+        userId: 'BOT',
+        userName: config.llmName,
+        text: responseText
+      });
+
+      await fs.writeFile(historyFilePath, JSON.stringify(voiceHistory, null, 2));
+      const cleanedTextForTTS = responseText.replace(/\*.*?\*/g, '').trim();
+
+      if (cleanedTextForTTS) {
+        ttsQueue.push(cleanedTextForTTS);
+        if (!isPlaying) {
+          playNextInQueue();
+        }
       }
+    } else {
+      console.log('No reponse necessary. Skipping.')
+      return;
     }
 
   } catch (error) {
