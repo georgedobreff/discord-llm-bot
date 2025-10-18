@@ -163,14 +163,6 @@ async function processAudio(userId, userName) {
   const audioFilePath = path.join(USER_SPEECH_DIR, `${userId}.wav`);
 
   try {
-    const stats = await fs.stat(audioFilePath);
-    const fileSizeInBytes = stats.size;
-    const minimumFileSize = 19500;
-
-    if (fileSizeInBytes < minimumFileSize) {
-      console.warn(`Discarding silent/short audio file for ${userName}.`);
-      return;
-    }
 
     const transcription = await groq.audio.transcriptions.create({
       file: fsSync.createReadStream(audioFilePath),
@@ -182,7 +174,7 @@ async function processAudio(userId, userName) {
     const triggerPhrase = `${config.voiceTriggerPhrase}`;
 
     if (!transcriptionText || transcriptionText.trim().length <= 3) {
-      console.log("Transcription is empty.");
+      console.log("Empty or too short. Ignoring speech.");
       return;
     }
 
@@ -204,7 +196,7 @@ async function processAudio(userId, userName) {
     const formattedHistory = voiceHistory.map(entry => `${entry.userName}: ${entry.text}`).join('\n');
 
     const messages = [
-      { role: 'system', content: `${config.voiceWaifu} This is the current voice conversation history:\n${formattedHistory}` },
+      { role: 'system', content: `${config.voiceWaifu} This is the conversation history:\n${formattedHistory}` },
       { role: 'user', content: transcriptionText }
     ];
 

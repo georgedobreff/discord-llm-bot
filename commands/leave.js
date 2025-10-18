@@ -1,10 +1,11 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { getVoiceConnection } = require('@discordjs/voice');
+const config = require('../config.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('leave')
-    .setDescription('Kick Lilly out of the vc'),
+    .setDescription(`Kick ${config.llmName} out of the vc`),
 
   async execute(interaction) {
     const connection = getVoiceConnection(interaction.guildId);
