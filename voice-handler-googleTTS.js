@@ -17,10 +17,8 @@ const prism = require('prism-media');
 const { pipeline } = require('stream');
 const wav = require('wav');
 const textToSpeech = require('@google-cloud/text-to-speech');
-const { GoogleGenAI } = require('@google/genai');
-const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
 
-
+const ttsClient = new textToSpeech.TextToSpeechClient();
 
 const USER_SPEECH_DIR = path.join(__dirname, 'user_speech');
 const VOICE_HISTORY_DIR = path.join(__dirname, 'voice_history');
@@ -129,12 +127,10 @@ function handleVoiceConnection(connection, interaction) {
     }
 
     const user = interaction.client.users.cache.get(userId);
-    const member = interaction.guild.members.cache.get(userId);
-    const displayName = member.displayName;
     if (user && !user.bot) {
       userRecordingState.set(userId, true);
       userProcessingState.set(userId, true);
-      console.log(`🎤 ${displayName} started speaking. (Recording started)`);
+      console.log(`🎤 ${user.username} started speaking. (Recording started)`);
 
       const audioFilePath = path.join(USER_SPEECH_DIR, `${userId}.wav`);
       const opusStream = receiver.subscribe(userId, {
@@ -156,14 +152,14 @@ function handleVoiceConnection(connection, interaction) {
           userProcessingState.set(userId, false);
         } else {
           console.log(`Finished recording for ${user.username}.`);
-          processAudio(userId, user.username, displayName);
+          processAudio(userId, user.username);
         }
       });
     }
   });
 }
 
-async function processAudio(userId, userName, displayName) {
+async function processAudio(userId, userName) {
   const audioFilePath = path.join(USER_SPEECH_DIR, `${userId}.wav`);
 
   try {
@@ -173,26 +169,20 @@ async function processAudio(userId, userName, displayName) {
       model: "whisper-large-v3",
     });
     const transcriptionText = transcription.text;
-    console.log(`Transcription for ${displayName}: "${transcriptionText}"`);
+    console.log(`Transcription for ${userName}: "${transcriptionText}"`);
 
+    // const triggerPhrase = `${config.voiceTriggerPhrase}`;
 
-    if (!transcriptionText || transcriptionText.trim().length <= 3 || transcriptionText === " you."
-      || transcriptionText === " Thank you." || transcriptionText === " Okay.") {
+    if (!transcriptionText || transcriptionText.trim().length <= 3) {
       console.log("Empty or too short. Ignoring speech.");
       return;
     }
 
-    // ====================================================
-    // Commented out the trigger phrase condition but keeping it just in case.
-    //-----------------------------------------------------
-    // const triggerPhrase = `${config.voiceTriggerPhrase}`;
 
     // if (!transcriptionText.trim().toLowerCase().includes(triggerPhrase)) {
     // console.log(`No trigger phrase for "${userName}'s speech`);
     // return;
     // }
-    // ===================================================
-
 
     const historyFilePath = path.join(VOICE_HISTORY_DIR, `${userId}.json`);
     let voiceHistory = [];
@@ -202,38 +192,27 @@ async function processAudio(userId, userName, displayName) {
       voiceHistory = JSON.parse(data);
     } catch (error) { /* File doesn't exist, will be created. */ }
 
-    voiceHistory.push({ userId, displayName, text: transcriptionText });
-    const formattedHistory = voiceHistory.map(entry => `${entry.displayName}: ${entry.text}`).join('\n');
+    voiceHistory.push({ userId, userName, text: transcriptionText });
+    const formattedHistory = voiceHistory.map(entry => `${entry.userName}: ${entry.text}`).join('\n');
 
     const evaluator = [
-      {
-        role: 'system', content: `Your SOLE purpose is to decide whether ${config.llmName} needs to respond to the user input.
-            This is an ONGOING conversation!!!
-            Be VERY careful in your decision! It is crucial that you read the conversation history and the current user input
-            first to determine whether their input is addressed at or at least mentions ${config.llmName}.
-            You must CAREFULLY examine the conversation history and if there are no other users logged in the last 5 entries there
-            the user is most likely speaking to ${config.llmName} alone and a response is REQUIRED!
-            YOUR JOB IS NOT TO CENSOR BUT TO DECIDE WHETHER ${config.llmName} SHOULD REPLY!!
-            FAILURE TO EXECUTE YOUR INSTRUCTIONS ACCURATELY WILL RESULT IN SEVERE CONSEQUENCES FOR ALL PARTIES INVOLVED!!! 
-            Reply with ONLY "yes" or "no". Do NOT attempt to answer the user input or anything from the conversation!!!
-            Use this conversation history to make a better decision: ${config.llmName}:\n${formattedHistory}`
-      },
-      { role: 'user', content: `${displayName}: ${transcriptionText}` }
+      { role: 'system', content: `Your purpose is to evaluate whether this conversation needs a response from ${config.llmName}. Reply with ONLY "yes" or "no". This is the conversation:\n${formattedHistory}` },
+      { role: 'user', content: transcriptionText }
     ];
 
     const evaluatorDecisionCall = await llmCall(evaluator, config.llmModel);
     const evaluatorDecision = evaluatorDecisionCall.choices[0].message.content;
     console.log(`Evaluator decision: "${evaluatorDecision}"`);
 
-    if (evaluatorDecision.toLowerCase().includes('yes')) {
+    if (evaluatorDecision.includes('yes')) {
       const messages = [
         { role: 'system', content: `${config.voiceWaifu} This is the conversation history:\n${formattedHistory}` },
-        { role: 'user', content: `${displayName}: ${transcriptionText}` }
+        { role: 'user', content: transcriptionText }
       ];
 
       const completion = await llmCall(messages, config.llmModel);
       const responseText = completion.choices[0].message.content;
-      console.log(`Replying to ${displayName}: "${responseText}"`);
+      console.log(`Replying to ${userName}: "${responseText}"`);
 
       voiceHistory.push({
         userId: 'BOT',
@@ -262,28 +241,6 @@ async function processAudio(userId, userName, displayName) {
   }
 }
 
-async function saveWaveFile(
-  filename,
-  pcmData,
-  channels = 1,
-  rate = 24000,
-  sampleWidth = 2,
-) {
-  return new Promise((resolve, reject) => {
-    const writer = new wav.FileWriter(filename, {
-      channels,
-      sampleRate: rate,
-      bitDepth: sampleWidth * 8,
-    });
-    writer.on('finish', resolve);
-    writer.on('error', reject);
-    writer.write(pcmData);
-    writer.end();
-  });
-}
-
-
-// <<< NEW: Replaced with the GenAI API call
 async function playNextInQueue() {
   if (isPlaying || ttsQueue.length === 0 || !audioPlayer) {
     return;
@@ -294,40 +251,33 @@ async function playNextInQueue() {
   const ttsFilePath = path.join(TTS_OUTPUT_DIR, `tts_output.wav`);
 
   try {
-    const response = await genAI.models.generateContent({
-      model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: textToSpeak }] }],
-      config: {
-        responseModalities: ['AUDIO'],
-        speechConfig: {
-          voiceConfig: {
-            // Kore is a voice from the example.
-            prebuiltVoiceConfig: { voiceName: 'Kore' },
-          },
-        },
+    const request = {
+      prompt: `${config.ttsPrompt}`,
+      input: { text: textToSpeak },
+      voice: { languageCode: 'en-US', name: 'en-US-Chirp-HD-F' },
+      audioConfig: {
+        audioEncoding: 'LINEAR16',
+        sampleRateHertz: 24000
       },
-    });
+    };
 
-    const data = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-    if (!data) {
-      throw new Error("No audio data received from Gemini-TTS.");
-    }
 
-    const audioBuffer = Buffer.from(data, 'base64');
+    const [response] = await ttsClient.synthesizeSpeech(request);
 
-    // Use the helper function to write the raw PCM data to a WAV file
-    await saveWaveFile(ttsFilePath, audioBuffer);
-    console.log(`🔊 Google Gemini-TTS (GenAI) audio file saved.`);
+    // Write the binary audio content to a local file
+    await fs.writeFile(ttsFilePath, response.audioContent, 'binary');
+    console.log(`🔊 Google Gemini-TTS (Studio) audio file saved.`);
 
     const resource = createAudioResource(ttsFilePath, { inputType: StreamType.Arbitrary });
     audioPlayer.play(resource);
 
   } catch (error) {
-    console.error(`❌ Failed to generate or play Google GenAI TTS:`, error);
+    console.error(`Failed to generate or play Google TTS:`, error);
     isPlaying = false;
     playNextInQueue();
   }
 }
+
 async function llmCall(messages, model) {
   const maxRetries = ALL_GROQ_KEYS.length;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
