@@ -7,7 +7,7 @@ BOT_STATUS = 'online'//online, idle, dnd, invisible - change to your liking
 
 // LLM Configuration
 const llmName = 'Lilly'; // the AI's name
-const voiceTriggerPhrase = 'lily'; // sets the phrase you want to trigger a response from the LLM in a vc
+//const voiceTriggerPhrase = 'lily'; // sets the phrase you want to trigger a response from the LLM in a vc
 const historyLimit = 100; // how far back does the LLM remember the conversation
 const characterLimit = 200; // maximum number of characters for the LLM's response.
 const voicecharacterLimit = 300; // character limit for voice channels
@@ -16,7 +16,7 @@ const searchModel = 'openai/gpt-oss-120b' // model used for web searches
 const searchCharacterLimit = 400; // higher response limit for searches
 
 
-const idleTimer = 3 * 60 * 60 * 1000 + (Math.random() * 10); // Default 3hrs. Idle time before your waifu DMs you.
+const idleTimer = 4 * 60 * 60 * 1000 + (Math.random() * 20); // Default 3hrs. Idle time before your waifu DMs you.
 const idleCheck = 15 * 60 * 1000; // Default 15mins. How often to check for idle users
 const idleSave = 10 * 60 * 1000;  // Default 10mins. How often do we save the idle users data.
 
@@ -96,8 +96,8 @@ const searchPersona = `You are a sweet, loving and romantic girl.Your name is ${
 const idleLLMPrompt = [ // The prompt sent to the LLM to generate the DM check-in message for idle users.
   {
     role: 'system', content: `It's been a while since the user last spoke to you. 
-                    Your goal is to check on them and initiate a conversation.
-Respond in a way that aligns with your persona - ${llmPersona} - and that will prompt a reply from them.`
+                    Your goal is to initiate a conversation.
+                    ${llmPersona}.`
   },
 ];
 
@@ -122,6 +122,5 @@ module.exports = {
   searchPersona,
   voicecharacterLimit,
   voiceWaifu,
-  voiceTriggerPhrase,
   ttsPrompt,
 };

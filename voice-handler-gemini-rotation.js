@@ -70,7 +70,7 @@ const ALL_GEMINI_KEYS = [
   process.env.GEMINI_API_KEY10,
 ].filter(key => typeof key === 'string' && key.trim() !== '');
 
-console.log("Loaded Gemini Keys:", ALL_GEMINI_KEYS);
+console.log("Loaded All Gemini Keys");
 
 if (ALL_GEMINI_KEYS.length === 0) {
   console.error("Please add at least one GEMINI_API_KEY to your .env file for TTS.");

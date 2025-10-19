@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { joinVoiceChannel, VoiceConnectionStatus, entersState, getVoiceConnection } = require('@discordjs/voice');
-const { handleVoiceConnection } = require('../voice-handler-gemini.js');
+const { handleVoiceConnection } = require('../voice-handler-gemini-rotation.js');
 const config = require('../config.js');
 module.exports = {
   data: new SlashCommandBuilder()
