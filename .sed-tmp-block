@@ -1,0 +1,25 @@
+// Ensure @discordjs/voice mock returns a functional audio player and exposes enums
+{
+  const voice = require('@discordjs/voice');
+  const { EventEmitter } = require('events');
+  // Default audio player mock
+  voice.createAudioPlayer.mockImplementation(() => {
+    const player = new EventEmitter();
+    player.stop = jest.fn();
+    player.play = jest.fn();
+    return player;
+  });
+  voice.createAudioResource.mockImplementation(() => ({}));
+  // Provide enums/constants that the module expects
+  voice.AudioPlayerStatus = voice.AudioPlayerStatus || { Idle: 'idle', Playing: 'playing' };
+  voice.NoSubscriberBehavior = voice.NoSubscriberBehavior || { Play: 'play' };
+  voice.StreamType = voice.StreamType || { Arbitrary: 'arbitrary' };
+  voice.VoiceConnectionStatus = voice.VoiceConnectionStatus || {
+    Disconnected: 'disconnected',
+    Destroyed: 'destroyed',
+    Signalling: 'signalling',
+    Connecting: 'connecting',
+    Ready: 'ready'
+  };
+  voice.EndBehaviorType = voice.EndBehaviorType || { AfterSilence: 'after_silence' };
+}
