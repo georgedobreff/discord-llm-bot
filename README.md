@@ -91,10 +91,13 @@ I still recommend you just sign up for the paid tier as Groq are offering a fant
 
 ```Both Google TTS and Gemini TTS have free tiers. Gemini is a lot better at natural speech but also rate limits are tight.```
 
+I've implemented the API rotation for Gemini as well but Google enforces rate limits via IP. If you want to truly do this you'd need to implement proxies.
+
 ### Setting up the bot code
 
 0. Clone the repo or download and extract zip
 1. Make sure you have <a href='https://nodejs.org/en/download' target=_blank >Node.js</a> installed
+1. Install <a href="https://www.ffmpeg.org/download.html" targe="_blank">ffmpeg</a> using your package manager (eg. sudo pacman -S ffmpeg)
 2. Edit the ```.env.example``` file and add your Bot Token, ClientID, and API key(s) then save the file as ``.env``
 3. Open a terminal in the project folder or navigate there
 4. Run ```npm install``` to install all dependencies
@@ -134,4 +137,3 @@ If you don't want that I recommend you use ```openai/gpt-oss-120b``` for a lot s
 * Vision capability a.k.a the bot responding to you sharing screen or turning on your camera.
 
 #### *Disclaimer: Exercise discretion when using this bot. I am not responsible for what you do with it.*
-
