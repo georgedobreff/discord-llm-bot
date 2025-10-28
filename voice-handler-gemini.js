@@ -227,7 +227,7 @@ async function processAudio(userId, userName, displayName) {
 
     if (evaluatorDecision.toLowerCase().includes('yes')) {
       const messages = [
-        { role: 'system', content: `${config.voiceWaifu} This is the conversation history:\n${formattedHistory}` },
+        { role: 'system', content: `${config.voiceLLM} This is the conversation history:\n${formattedHistory}` },
         { role: 'user', content: `${displayName}: ${transcriptionText}` }
       ];
 

@@ -21,7 +21,7 @@ module.exports = {
     try {
       connection.destroy();
       await interaction.reply({
-        content: 'Okay, I\'ll leave... talk to you later! 💋',
+        content: 'Okay, I\'ll leave... talk to you later!',
       });
     } catch (error) {
       console.error('❌ Error leaving voice channel:', error);

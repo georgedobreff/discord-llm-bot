@@ -185,7 +185,7 @@ async function processAudio(userId, userName) {
     const formattedHistory = voiceHistory.map(entry => `${entry.userName}: ${entry.text}`).join('\n');
 
     const messages = [
-      { role: 'system', content: `Speak with emotion that reflects what you're saying. You are ${config.voiceWaifu} This is the current voice conversation history:\n${formattedHistory}` },
+      { role: 'system', content: `Speak with emotion that reflects what you're saying. You are ${config.voiceLLM} This is the current voice conversation history:\n${formattedHistory}` },
       { role: 'user', content: transcriptionText }
     ];
 

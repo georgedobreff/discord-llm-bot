@@ -117,8 +117,8 @@ Edit the *config.js* file it is very straightforward.
 6. Set how often to check for inactive users (idleness).
 7. Set how often to log idle users.
 8. Define the personality for DMs.
-9. Define the personality for the server-side waifu.
-10. Define the name of the channel where you want the server-side waifu.
+9. Define the personality for the server-side llm.
+10. Define the name of the channel where you want the server-side llm.
 11. Define the prompt used to generate the check-in DM message.
 12. Set the bot activity and status on Discord.
 13. Change the LLM used for web search.

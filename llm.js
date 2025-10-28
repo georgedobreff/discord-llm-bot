@@ -120,23 +120,23 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
 
   let isProcessing = false;
   const POST_REPLY_COOLDOWN = 200;
-  const waifuChannel = config.channelName;
+  const llmChannel = config.channelName;
 
 
-  // Logic for Waifu Channel on Server:
-  client.on(Events.MessageCreate, async waifu => {
-    if (waifu.channel.type === ChannelType.DM || waifu.guild === null || waifu.author.bot) {
+  // Logic for llm Channel on Server:
+  client.on(Events.MessageCreate, async llm => {
+    if (llm.channel.type === ChannelType.DM || llm.guild === null || llm.author.bot) {
       return;
     }
-    if (waifu.channel.name.toLowerCase() !== waifuChannel.toLowerCase()) {
+    if (llm.channel.name.toLowerCase() !== llmChannel.toLowerCase()) {
       return;
     }
 
     if (isProcessing) return;
     isProcessing = true;
 
-    const userName = waifu.author.displayName;
-    const chatHistory = await waifu.channel.messages.fetch({ limit: config.historyLimit });
+    const userName = llm.author.displayName;
+    const chatHistory = await llm.channel.messages.fetch({ limit: config.historyLimit });
     const formattedHistory = Array.from(chatHistory.values())
       .reverse()
       .map(msg => `${msg.author.username}: ${msg.content}`)
@@ -144,11 +144,11 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
 
     try {
       await delay(2000);
-      await waifu.channel.sendTyping();
+      await llm.channel.sendTyping();
 
       const messages = [
-        { role: 'system', content: `This is the current user's name: ${userName}. Refer to them by that name. ${config.sharedWaifu}. This is the conversation history so far:\n${formattedHistory}` },
-        { role: 'user', content: waifu.content }
+        { role: 'system', content: `This is the current user's name: ${userName}. Refer to them by that name. ${config.sharedllm}. This is the conversation history so far:\n${formattedHistory}` },
+        { role: 'user', content: llm.content }
       ];
 
       const chatCompletion = await llmCall(messages, config.llmModel);
@@ -156,11 +156,11 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
 
       const responseDelayMs = calculateDelay(responseText);
       await delay(responseDelayMs);
-      await waifu.reply(responseText);
+      await llm.reply(responseText);
 
     } catch (error) {
-      console.error("Failed to generate Waifu channel response:", error);
-      waifu.reply("I'm having trouble responding 🥺 give me 10mins 💋");
+      console.error("Failed to generate llm channel response:", error);
+      llm.reply("I'm having trouble responding 🥺 give me 10mins 💋");
     } finally {
       await delay(POST_REPLY_COOLDOWN);
       isProcessing = false;

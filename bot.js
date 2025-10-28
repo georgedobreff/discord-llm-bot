@@ -43,7 +43,7 @@ async function saveInteractionData(lastInteractionTime, interactionFilePath) {
   }
 }
 
-async function startBot({ config, delay, calculateDelay, lastInteractionTime, initializeWaifu, deployCommands, interactionFilePath }) {
+async function startBot({ config, delay, calculateDelay, lastInteractionTime, initializeLLM, deployCommands, interactionFilePath }) {
 
   const client = new Client({
     intents: [
@@ -137,7 +137,7 @@ async function startBot({ config, delay, calculateDelay, lastInteractionTime, in
   });
 
 
-  initializeWaifu(client, config, delay, calculateDelay, lastInteractionTime);
+  initializeLLM(client, config, delay, calculateDelay, lastInteractionTime);
 
 
   try {

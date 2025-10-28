@@ -2,7 +2,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const config = require('./config.js');
-const initializeWaifu = require('./waifu.js'); 
+const initializeLLM = require('./llm.js'); 
 const { startBot } = require('./bot.js');
 const INTERACTION_FILE = path.join(__dirname, 'interactionTimes.json');
 const { REST, Routes } = require('discord.js');
@@ -48,7 +48,7 @@ startBot({
     delay, 
     calculateDelay, 
     lastInteractionTime, 
-    initializeWaifu,
+    initializeLLM,
     deployCommands,
     interactionFilePath: INTERACTION_FILE
 });
