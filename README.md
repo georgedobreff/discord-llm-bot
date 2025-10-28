@@ -1,4 +1,4 @@
-## Discord AI Waifu
+## Lilly - Discord AI Chatbot
 
 <img src='./Lilly banner.png' height = 250px;>
 
@@ -6,7 +6,7 @@
 
 **This is a work in progress and a practice project while I'm learning JS**
 
-The end goal is to have a ``` completely free ``` and customizable AI agent with chat, voice and image generation capabilities all inside a discord bot that you can add to your server.
+The end goal is to have a ``` completely free ``` and customizable AI with chat, voice, search and image generation capabilities all inside a Discord bot that you can add to your server.
 
 The bot uses the ```chat.completions``` framework so you can use any provider that supports it.
 
@@ -19,13 +19,13 @@ The bot uses the ```chat.completions``` framework so you can use any provider th
 
 * Web search via ```/search``` command.
 
-* Artificial delay based on response length to simulate typing.
+* Artificial delay based on response length to simulate realistic typing.
 
 * Separate configurable personalities for DMs and Server-wide bot.
 
-* Checks up on you after 3 hours of silence.
+* Checks up on you after 12 hours of silence.
 
-* User-specific memory system. Let your waifu remember things about you. /memories /remember /forget commands to manage the memory. Only usable in DMs to protect user's info.
+* User-specific memory system. Let your bot remember things about users. /memories /remember /forget commands to manage the memory. Only usable in DMs to protect user's info.
 
 * API keys rotation to ensure conversation continues after free tier limits are hit.<br>
 *``You would need multiple accounts or multiple providers with free tiers for this.If you can afford it by all means just pay to your chosen provider. This feature is here simply to ensure that the bot adheres to the goal of being free without compromising uptime too much.``*<br>
