@@ -16,7 +16,7 @@ const searchModel = 'openai/gpt-oss-120b' // model used for web searches
 const searchCharacterLimit = 400; // higher response limit for searches
 
 
-const idleTimer = 4 * 60 * 60 * 1000 + (Math.random() * 20); // Default 3hrs. Idle time before your llm DMs you.
+const idleTimer = 12 * 60 * 60 * 1000 + (Math.random() * 20); // Default 12hrs. Idle time before your llm DMs you.
 const idleCheck = 15 * 60 * 1000; // Default 15mins. How often to check for idle users
 const idleSave = 10 * 60 * 1000;  // Default 10mins. How often do we save the idle users data.
 
