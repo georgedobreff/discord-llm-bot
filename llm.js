@@ -139,6 +139,23 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
     const attachment = llm.attachments.first(); // Check for attachments
     const embed = llm.embeds[0]; // Check for embeds (like GIFs)
 
+
+    // Check replied to message for image/gif
+    let repliedImageUrl = null;
+    if (llm.reference && llm.reference.messageId) {
+      try {
+        const fetchedMessage = await llm.channel.messages.fetch(llm.reference.messageId);
+        const originalAttachment = fetchedMessage.attachments.first();
+        const originalEmbed = fetchedMessage.embeds[0];
+
+        if (originalAttachment && originalAttachment.contentType?.startsWith('image/')) {
+          repliedImageUrl = originalAttachment.url;
+        } else if (originalEmbed && (originalEmbed.image?.url || originalEmbed.thumbnail?.url)) {
+          repliedImageUrl = originalEmbed.image?.url || originalEmbed.thumbnail?.url;
+        }
+      } catch (error) { /* Failed to fetch, it's fine */ }
+    }
+
     let repliedMessageContent = '';
     if (llm.reference && llm.reference.messageId) {
       try {
@@ -150,7 +167,8 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
     }
 
     // Check if there is an attachment and if it's an image
-    if ((attachment && attachment.contentType?.startsWith('image/')) || (embed && (embed.image?.url || embed.thumbnail?.url))) {
+    const newImageUrl = ((attachment && attachment.contentType?.startsWith('image/')) || (embed && (embed.image?.url || embed.thumbnail?.url)));
+    if (newImageUrl || repliedImageUrl) {
       try {
         await delay(2000);
         await llm.channel.sendTyping();
@@ -161,8 +179,8 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
           .map(msg => `${msg.author.username}: ${msg.content}`)
           .join('\n');
 
-        const imageUrl = attachment ? attachment.url : (embed.image?.url || embed.thumbnail?.url);
-        const userText = llm.content || (attachment ? "Check this out!" : "Check out this GIF!"); // Use message content or a default prompt
+        const imageUrl = newImageUrl || repliedImageUrl;
+        const userText = llm.content || (newImageUrl ? "Check this out!" : "What about this?");
 
         const messages = [
           {
@@ -283,8 +301,26 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
     const attachment = userDM.attachments.first();
     const embed = userDM.embeds[0];
 
+    // If it's a reply check for image/gif
+    let repliedImageUrl = null;
+    if (userDM.reference && userDM.reference.messageId) {
+      try {
+        const fetchedMessage = await userDM.channel.messages.fetch(userDM.reference.messageId);
+        const originalAttachment = fetchedMessage.attachments.first();
+        const originalEmbed = fetchedMessage.embeds[0];
+
+        if (originalAttachment && originalAttachment.contentType?.startsWith('image/')) {
+          repliedImageUrl = originalAttachment.url;
+        } else if (originalEmbed && (originalEmbed.image?.url || originalEmbed.thumbnail?.url)) {
+          repliedImageUrl = originalEmbed.image?.url || originalEmbed.thumbnail?.url;
+        }
+      } catch (error) { /* Failed to fetch, it's fine */ }
+    }
+
+
     // Check if there is an attachment and if it's an image
-    if ((attachment && attachment.contentType?.startsWith('image/')) || (embed && (embed.image?.url || embed.thumbnail?.url))) {
+    const newImageUrl = attachment ? attachment.url : (embed ? (embed.image?.url || embed.thumbnail?.url) : null);
+    if (newImageUrl || repliedImageUrl) {
       try {
         await delay(1200);
         await userDM.channel.sendTyping();
@@ -296,8 +332,8 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
           .join('\n');
         const userMemories = await loadMemories(userId);
 
-        const imageUrl = attachment ? attachment.url : (embed.image?.url || embed.thumbnail?.url);
-        const userText = userDM.content || (attachment ? "Look at this image." : "Look at this GIF."); // Use message content or a default prompt
+        const imageUrl = newImageUrl || repliedImageUrl;
+        const userText = userDM.content || (newImageUrl ? "Look at this image." : "What about this?");
 
         const messages = [
           {
