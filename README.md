@@ -33,6 +33,8 @@ The bot uses the ```chat.completions``` framework so you can use any provider th
 
 * Voice integration with natural conversational ability. A secondary LLM decides whether the conversation warrants a response from Lilly or not. Perfect for having conversations with friends without getting constantly interrupted by Lilly. Due to limitations imposed by Discord this only works in a server voice channel. Calling the bot on a DM is impossible.
 
+* Can process images and GIF embeds from users and respond to them accurately.
+
 ## Installation
 
 ### Discord App Setup
