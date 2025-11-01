@@ -8,13 +8,17 @@ BOT_STATUS = 'online'//online, idle, dnd, invisible - change to your liking
 // LLM Configuration
 const llmName = 'Lilly'; // the AI's name
 //const voiceTriggerPhrase = 'lily'; // sets the phrase you want to trigger a response from the LLM in a vc
+
+// Character Limits
 const historyLimit = 100; // how far back does the LLM remember the conversation
 const characterLimit = 200; // maximum number of characters for the LLM's response.
 const voicecharacterLimit = 300; // character limit for voice channels
-const llmModel = 'llama-3.3-70b-versatile'; // make sure you use GROQ.com listed models.
-const searchModel = 'openai/gpt-oss-120b' // model used for web searches
 const searchCharacterLimit = 400; // higher response limit for searches
 
+// Models
+const llmModel = 'llama-3.3-70b-versatile'; // make sure you use GROQ.com listed models.
+const searchModel = 'openai/gpt-oss-120b' // model used for web searches
+const visionModel = 'meta-llama/llama-4-scout-17b-16e-instruct'
 
 const idleTimer = 12 * 60 * 60 * 1000 + (Math.random() * 20); // Default 12hrs. Idle time before your llm DMs you.
 const idleCheck = 15 * 60 * 1000; // Default 15mins. How often to check for idle users
@@ -120,4 +124,5 @@ module.exports = {
   voicecharacterLimit,
   voiceLLM,
   ttsPrompt,
+  visionModel
 };

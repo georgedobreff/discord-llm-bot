@@ -136,6 +136,67 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
     isProcessing = true;
 
     const userName = llm.author.displayName;
+    const attachment = llm.attachments.first(); // Check for attachments
+
+    // Check if there is an attachment and if it's an image
+    if (attachment && attachment.contentType?.startsWith('image/')) {
+      try {
+        await delay(2000);
+        await llm.channel.sendTyping();
+
+        const chatHistory = await llm.channel.messages.fetch({ limit: config.historyLimit });
+        const formattedHistory = Array.from(chatHistory.values())
+          .reverse()
+          .map(msg => `${msg.author.username}: ${msg.content}`)
+          .join('\n');
+
+        const imageUrl = attachment.url;
+        const userText = llm.content || "Check this out!"; // Use message content or a default prompt
+
+        const messages = [
+          {
+            role: 'system',
+            // Use existing persona + add the extra instruction
+            content: `This is the current user's name: ${userName}. Refer to them by that name. ${config.sharedLLM}.
+                      The user has attached an image. Your task is to analyze the image and respond to it, along with their text.
+                      This is the conversation history so far:\n${formattedHistory}`
+          },
+          {
+            role: 'user',
+            content: [
+              {
+                "type": "text",
+                "text": userText
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": imageUrl,
+                }
+              }
+            ]
+          }
+        ];
+
+        // Call the LLM with the vision model
+        const chatCompletion = await llmCall(messages, config.visionModel);
+        const responseText = chatCompletion.choices[0].message.content;
+
+        const responseDelayMs = calculateDelay(responseText);
+        await delay(responseDelayMs);
+        await llm.reply(responseText);
+
+      } catch (error) {
+        console.error("Failed to generate llm channel vision response:", error);
+        llm.reply("I'm having a little trouble seeing that image 🥺 try again in 10mins 💋");
+      } finally {
+        await delay(POST_REPLY_COOLDOWN);
+        isProcessing = false;
+      }
+      return; // Stop execution so it doesn't run the text-only logic
+    }
+
+
     const chatHistory = await llm.channel.messages.fetch({ limit: config.historyLimit });
     const formattedHistory = Array.from(chatHistory.values())
       .reverse()
@@ -147,7 +208,7 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
       await llm.channel.sendTyping();
 
       const messages = [
-        { role: 'system', content: `This is the current user's name: ${userName}. Refer to them by that name. ${config.sharedllm}. This is the conversation history so far:\n${formattedHistory}` },
+        { role: 'system', content: `This is the current user's name: ${userName}. Refer to them by that name. ${config.sharedLLM}. This is the conversation history so far:\n${formattedHistory}` },
         { role: 'user', content: llm.content }
       ];
 
@@ -175,6 +236,64 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
     const userName = userDM.author.displayName;
     const userId = userDM.author.id;
     lastInteractionTime.set(userId, Date.now());
+    const attachment = userDM.attachments.first();
+
+    // Check if there is an attachment and if it's an image
+    if (attachment && attachment.contentType?.startsWith('image/')) {
+      try {
+        await delay(1200);
+        await userDM.channel.sendTyping();
+
+        const chatHistory = await userDM.channel.messages.fetch({ limit: config.historyLimit });
+        const formattedHistory = Array.from(chatHistory.values())
+          .reverse()
+          .map(msg => `${msg.author.username}: ${msg.content}`)
+          .join('\n');
+        const userMemories = await loadMemories(userId);
+
+        const imageUrl = attachment.url;
+        const userText = userDM.content || "Look at this image."; // Use message content or a default prompt
+
+        const messages = [
+          {
+            role: 'system',
+            // Use existing persona + add the extra instruction
+            content: `This is the user's name: ${userName}. Refer to them by that name. ${config.llmPersona}.
+                      The user has attached an image. Your task is to analyze the image and respond to it, along with their text.
+                      These are the things the user wants you to remember when talking to them: ${userMemories}.
+                      This is the conversation history so far:\n${formattedHistory}`
+          },
+          {
+            role: 'user',
+            content: [
+              {
+                "type": "text",
+                "text": userText
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": imageUrl,
+                }
+              }
+            ]
+          }
+        ];
+
+        // Call the LLM with the vision model
+        const chatCompletion = await llmCall(messages, config.visionModel);
+        const responseText = chatCompletion.choices[0].message.content;
+
+        const responseDelayMs = calculateDelay(responseText);
+        await delay(responseDelayMs);
+        await userDM.channel.send(responseText);
+
+      } catch (error) {
+        console.error("Failed to generate vision DM response:", error);
+        userDM.channel.send("I'm having a little trouble seeing that image 🥺 try again in 10mins 💋");
+      }
+      return; // Stop execution so it doesn't run the text-only logic
+    }
 
     const chatHistory = await userDM.channel.messages.fetch({ limit: config.historyLimit });
     const formattedHistory = Array.from(chatHistory.values())
