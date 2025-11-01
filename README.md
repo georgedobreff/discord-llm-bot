@@ -35,6 +35,8 @@ The bot uses the ```chat.completions``` framework so you can use any provider th
 
 * Can process images and GIF embeds from users and respond to them accurately.
 
+* LLM is aware of replied to messages.
+
 ## Installation
 
 ### Discord App Setup
