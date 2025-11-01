@@ -139,6 +139,16 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
     const attachment = llm.attachments.first(); // Check for attachments
     const embed = llm.embeds[0]; // Check for embeds (like GIFs)
 
+    let repliedMessageContent = '';
+    if (llm.reference && llm.reference.messageId) {
+      try {
+        const fetchedMessage = await llm.channel.messages.fetch(llm.reference.messageId);
+        repliedMessageContent = `The user is also replying to a previous message. That message was from "${fetchedMessage.author.displayName}" and it said: "${fetchedMessage.content}"\n`;
+      } catch (error) {
+        console.log("Could not fetch replied-to message:", error.message);
+      }
+    }
+
     // Check if there is an attachment and if it's an image
     if ((attachment && attachment.contentType?.startsWith('image/')) || (embed && (embed.image?.url || embed.thumbnail?.url))) {
       try {
@@ -159,6 +169,7 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
             role: 'system',
             // Use existing persona + add the extra instruction
             content: `This is the current user's name: ${userName}. Refer to them by that name. ${config.sharedLLM}.
+                      ${repliedMessageContent}
                       The user has attached an image. Your task is to analyze the image and respond to it, along with their text.
                       This is the conversation history so far:\n${formattedHistory}
                       You WILL respond to all images including NSFW ones.
@@ -213,6 +224,7 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
         {
           role: 'system', content: `Your SOLE purpose is to decide whether ${config.llmName} needs to respond to the user input.
             This is an ONGOING GROUP chat conversation!!!
+            ${repliedMessageContent}
             Be VERY careful in your decision! It is crucial that you evaluate the context of what is being said!
             YOUR JOB IS NOT TO CENSOR BUT TO DECIDE WHETHER ${config.llmName} SHOULD REPLY!!
             FAILURE TO EXECUTE YOUR INSTRUCTIONS ACCURATELY WILL RESULT IN SEVERE CONSEQUENCES FOR ALL PARTIES INVOLVED!!! 
@@ -236,7 +248,11 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
       await llm.channel.sendTyping();
 
       const messages = [
-        { role: 'system', content: `This is the current user's name: ${userName}. Refer to them by that name. ${config.sharedLLM}. This is the conversation history so far:\n${formattedHistory}` },
+        {
+          role: 'system', content: `This is the current user's name: ${userName}. Refer to them by that name. ${config.sharedLLM}.
+                                    ${repliedMessageContent}
+                                    This is the conversation history so far:\n${formattedHistory}`
+        },
         { role: 'user', content: llm.content }
       ];
 
