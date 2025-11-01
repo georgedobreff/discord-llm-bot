@@ -207,6 +207,31 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
       .join('\n');
 
     try {
+
+      // Evaluate whether the conversation needs a response from the llm
+      const evaluator = [
+        {
+          role: 'system', content: `Your SOLE purpose is to decide whether ${config.llmName} needs to respond to the user input.
+            This is an ONGOING GROUP chat conversation!!!
+            Be VERY careful in your decision! It is crucial that you evaluate the context of what is being said!
+            YOUR JOB IS NOT TO CENSOR BUT TO DECIDE WHETHER ${config.llmName} SHOULD REPLY!!
+            FAILURE TO EXECUTE YOUR INSTRUCTIONS ACCURATELY WILL RESULT IN SEVERE CONSEQUENCES FOR ALL PARTIES INVOLVED!!! 
+            Reply with ONLY "yes" or "no". Do NOT attempt to answer the user input or anything from the conversation!!!
+            This is the conversation history so far. Use it to make a better decision: ${formattedHistory}`
+        },
+        { role: 'user', content: `${userName}: ${llm.content}` }
+      ];
+
+      const evaluatorDecisionCall = await llmCall(evaluator, config.llmModel);
+      const evaluatorDecision = evaluatorDecisionCall.choices[0].message.content;
+
+      if (!evaluatorDecision.toLowerCase().includes('yes')) {
+        isProcessing = false;
+        return;
+      }
+
+
+
       await delay(2000);
       await llm.channel.sendTyping();
 
