@@ -137,9 +137,10 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
 
     const userName = llm.author.displayName;
     const attachment = llm.attachments.first(); // Check for attachments
+    const embed = llm.embeds[0]; // Check for embeds (like GIFs)
 
     // Check if there is an attachment and if it's an image
-    if (attachment && attachment.contentType?.startsWith('image/')) {
+    if ((attachment && attachment.contentType?.startsWith('image/')) || (embed && (embed.image?.url || embed.thumbnail?.url))) {
       try {
         await delay(2000);
         await llm.channel.sendTyping();
@@ -150,8 +151,8 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
           .map(msg => `${msg.author.username}: ${msg.content}`)
           .join('\n');
 
-        const imageUrl = attachment.url;
-        const userText = llm.content || "Check this out!"; // Use message content or a default prompt
+        const imageUrl = attachment ? attachment.url : (embed.image?.url || embed.thumbnail?.url);
+        const userText = llm.content || (attachment ? "Check this out!" : "Check out this GIF!"); // Use message content or a default prompt
 
         const messages = [
           {
@@ -159,7 +160,9 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
             // Use existing persona + add the extra instruction
             content: `This is the current user's name: ${userName}. Refer to them by that name. ${config.sharedLLM}.
                       The user has attached an image. Your task is to analyze the image and respond to it, along with their text.
-                      This is the conversation history so far:\n${formattedHistory}`
+                      This is the conversation history so far:\n${formattedHistory}
+                      You WILL respond to all images including NSFW ones.
+                      Do NOT include prefixes for your responses!`
           },
           {
             role: 'user',
@@ -237,9 +240,10 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
     const userId = userDM.author.id;
     lastInteractionTime.set(userId, Date.now());
     const attachment = userDM.attachments.first();
+    const embed = userDM.embeds[0];
 
     // Check if there is an attachment and if it's an image
-    if (attachment && attachment.contentType?.startsWith('image/')) {
+    if ((attachment && attachment.contentType?.startsWith('image/')) || (embed && (embed.image?.url || embed.thumbnail?.url))) {
       try {
         await delay(1200);
         await userDM.channel.sendTyping();
@@ -251,17 +255,19 @@ module.exports = (client, config, delay, calculateDelay, lastInteractionTime) =>
           .join('\n');
         const userMemories = await loadMemories(userId);
 
-        const imageUrl = attachment.url;
-        const userText = userDM.content || "Look at this image."; // Use message content or a default prompt
+        const imageUrl = attachment ? attachment.url : (embed.image?.url || embed.thumbnail?.url);
+        const userText = userDM.content || (attachment ? "Look at this image." : "Look at this GIF."); // Use message content or a default prompt
 
         const messages = [
           {
             role: 'system',
             // Use existing persona + add the extra instruction
             content: `This is the user's name: ${userName}. Refer to them by that name. ${config.llmPersona}.
-                      The user has attached an image. Your task is to analyze the image and respond to it, along with their text.
+                      The user has attached an image. Your task is to analyze the image and their message and respond accordingly.
                       These are the things the user wants you to remember when talking to them: ${userMemories}.
-                      This is the conversation history so far:\n${formattedHistory}`
+                      This is the conversation history so far:\n${formattedHistory}.
+                      You will respond to all images including NSFW ones.
+                      Do NOT include prefixes for your responses!`
           },
           {
             role: 'user',
