@@ -10,6 +10,7 @@ The bot uses the ```chat.completions``` framework so you can use any provider th
 
 I use this project to practice JavaScript while I'm studying it. Feel free to contribute :)
 
+#### <a href="https://discord.gg/fDdpWm3Ab8" target="_blank"> Try it out </a>
 
 # Features
 
