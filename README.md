@@ -32,6 +32,10 @@ I use this project to practice JavaScript while I'm studying it. Feel free to co
 
 * Web search via slash command `/search`
 
+* Image Generation using Stable Diffusion
+
+  - Hugging Face inference used and the offer free credits.
+
     #### Quality of life features
 
     * Artificial delay based on response length to simulate realistic typing.
@@ -112,14 +116,29 @@ I use this project to practice JavaScript while I'm studying it. Feel free to co
 
 * Make a note of the API key somewhere.
 
+
+### Hugging Face
+
+* Go to <a href="https://huggingface.co/" target="_blank"> Hugging Face</a> and create an account
+
+* Once logged in click your profile icon then `Access Tokens`
+
+* Click `Create New Token`
+
+* Under `Token Type` select `Read` and `Create Token`.
+
+* Copy and make a note of your token.
+
 <br>
+
+
 
 ## Setting up 💖Lilly💖
 
 - Clone the repo or download and extract zip
 - Make sure you have <a href='https://nodejs.org/en/download' target=_blank >Node.js</a> installed
 - Download and Install <a href="https://www.ffmpeg.org/download.html" targe="_blank">ffmpeg</a> or use your package manager (eg. `sudo pacman -S ffmpeg`)
-- Edit the ```.env.example``` file and add your Bot Token, ClientID, and API key then save the file as ``.env``
+- Edit the ```.env.example``` file and add your Bot Token, ClientID, API keys and HF Token then save the file as ``.env``
 - Open a terminal in the project folder or navigate there
 - `npm install` to install all dependencies
 - `npm start` to launch the bot.
@@ -144,7 +163,7 @@ I use this project to practice JavaScript while I'm studying it. Feel free to co
 
 - [ ] Add support for multiple simultaneous voice channels
     - [ ] Including support for multiple simultaneous servers and channels
-- [ ] Add image generation capability
+- [x] Add image generation capability
 - [ ] Explore the possibility of LLM "seeing" shared screen in VC.
 - [ ] Explore the possibility of LLM "seeing" user's camera feed.
 
