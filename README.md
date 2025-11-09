@@ -36,24 +36,24 @@ I use this project to practice JavaScript while I'm studying it. Feel free to co
 
   - Hugging Face inference used and the offer free credits.
 
-    #### Quality of life features
+#### Quality of life features
 
-    * Artificial delay based on response length to simulate realistic typing.
+  * Artificial delay based on response length to simulate realistic typing.
 
-    * Separate configurable personalities for DMs and Server AI.
+  * Separate configurable personalities for DMs and Server AI.
 
-    * Checks up on users after 12 hours of silence.(via DM)
+  * Checks up on users after 12 hours of silence.(via DM)
 
-    * Conversation evaluator to prevent the LLM from responding to every single message. Implemented for voice calls too.
+  * Conversation evaluator to prevent the LLM from responding to every single message. Implemented for voice calls too.
 
-    * Fallback too GoogleTTS if Gemini-TTS rate limit is hit for voice calls.
+  * Fallback too GoogleTTS if Gemini-TTS rate limit is hit for voice calls.
 
-    #### Optional
+#### Optional
 
-    * API keys rotation to ensure conversation continues after free tier limits are hit.<br>
+  * API keys rotation to ensure conversation continues after free tier limits are hit.<br>
     *This feature is here simply to ensure that the bot adheres to the goal of being free without compromising uptime too much. **Creating multiple accounts is against the Groq.com Terms of Service and Acceptable Use Policy**. I am not responsible for your actions.*
     
-    * Trigger phrase for voice calls. Listens for a phrase like "Hey Lilly" before it responds. 
+  * Trigger phrase for voice calls. Listens for a phrase like "Hey Lilly" before it responds. 
 
 <br>
 
