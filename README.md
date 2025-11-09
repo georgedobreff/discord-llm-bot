@@ -32,9 +32,8 @@ I use this project to practice JavaScript while I'm studying it. Feel free to co
 
 * Web search via slash command `/search`
 
-* Image Generation using Stable Diffusion
+* Image Generation using Stable Diffusion on HuggingFace
 
-  - Hugging Face inference used and the offer free credits.
 
 #### Quality of life features
 
