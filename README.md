@@ -6,8 +6,6 @@
 
 This a **completely free** and customizable AI Discord bot with chat, voice, search and vision capabilities.
 
-### <a href="https://discord.gg/fDdpWm3Ab8" target="_blank"> See it in action in the Tavern 🍻 </a>
-
 
 The bot uses the ```chat.completions``` framework so you can use any provider that supports it.
 
