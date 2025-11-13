@@ -5,12 +5,7 @@
 <br>
 
 This a **completely free** and customizable AI Discord bot with chat, voice, search and vision capabilities.
-
-
 The bot uses the ```chat.completions``` framework so you can use any provider that supports it.
-
-I use this project to practice JavaScript while I'm studying it. Feel free to contribute :)
-
 
 
 # Features
